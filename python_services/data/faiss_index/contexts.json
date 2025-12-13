@@ -1,0 +1,356 @@
+{
+  "contexts": [
+    "Osmanlı İmparatorluğu, 1299 yılında Osman Bey tarafından Söğüt'te kurulmuştur. İmparatorluk, 623 yıl boyunca üç kıtada hüküm sürmüş ve 1922 yılında sona ermiştir. Osmanlı, tarihte en uzun süre ayakta kalan imparatorluklardan biridir.",
+    "İstanbul'un fethi, 29 Mayıs 1453 tarihinde Fatih Sultan Mehmet komutasındaki Osmanlı ordusu tarafından gerçekleştirilmiştir. Bu olay, Orta Çağ'ın sonu ve Yeni Çağ'ın başlangıcı olarak kabul edilmektedir. Fetih, dünya tarihinin en önemli dönüm noktalarından biridir.",
+    "Türkiye Cumhuriyeti, 29 Ekim 1923 tarihinde Mustafa Kemal Atatürk önderliğinde ilan edilmiştir. Bu tarih, her yıl Cumhuriyet Bayramı olarak kutlanmaktadır. Atatürk, cumhuriyetin ilk cumhurbaşkanı olmuştur.",
+    "Türk Kurtuluş Savaşı, 1919-1923 yılları arasında yapılmıştır. Mustafa Kemal Atatürk liderliğindeki milli mücadele, işgalci güçlere karşı verilen bağımsızlık savaşıdır. Savaş, Lozan Antlaşması ile sona ermiştir.",
+    "Kanuni Sultan Süleyman, 1520-1566 yılları arasında toplam 46 yıl padişahlık yapmıştır. Bu dönem, Osmanlı İmparatorluğu'nun en parlak çağı olarak kabul edilir. Kanuni döneminde imparatorluk en geniş sınırlarına ulaşmıştır.",
+    "Çanakkale Savaşı, 1915-1916 yıllarında gerçekleşen ve Osmanlı İmparatorluğu'nun I. Dünya Savaşı'ndaki en önemli zaferlerinden biridir. Bu savaş, Mustafa Kemal'in askeri dehasını ortaya koymuş ve milli bilinçin uyanmasında kritik rol oynamıştır.",
+    "Anadolu Selçuklu Devleti'nin başkenti Konya'dır. Devlet, 1077-1308 yılları arasında Anadolu'da hüküm sürmüştür. Konya, bu dönemde önemli bir kültür ve sanat merkezi haline gelmiştir.",
+    "Malazgirt Savaşı, 26 Ağustos 1071 tarihinde Sultan Alparslan komutasındaki Selçuklu ordusu ile Bizans İmparatoru Romanos Diogenes komutasındaki Bizans ordusu arasında yapılmıştır. Bu zafer, Türklerin Anadolu'ya açılan kapısı olmuştur.",
+    "Mustafa Kemal Atatürk, 1881 yılında Selanik'te doğmuştur. Kesin doğum tarihi bilinmemekle birlikte, 19 Mayıs 1881 kabul edilmiştir. Atatürk, modern Türkiye'nin kurucusu ve ilk cumhurbaşkanıdır.",
+    "Lozan Antlaşması, 24 Temmuz 1923 tarihinde İsviçre'nin Lozan şehrinde imzalanmıştır. Bu antlaşma, Türkiye Cumhuriyeti'nin uluslararası alanda tanınmasını sağlamıştır. Sevr Antlaşması'nı geçersiz kılan önemli bir diplomatik zaferdir.",
+    "Harf inkılabı, 1 Kasım 1928 tarihinde kabul edilmiştir. Bu devrimle Arap alfabesinden Latin alfabesine geçilmiştir. Atatürk, bu değişikliğin eğitimi kolaylaştıracağına inanmıştır.",
+    "Türk kadınlarına belediye seçimlerinde oy kullanma hakkı 1930'da, milletvekili seçme ve seçilme hakkı ise 5 Aralık 1934'te verilmiştir. Türkiye, bu konuda birçok Avrupa ülkesinden önce davranmıştır.",
+    "Sakarya Meydan Muharebesi, 23 Ağustos - 13 Eylül 1921 tarihleri arasında 22 gün 22 gece sürmüştür. Bu savaş, Kurtuluş Savaşı'nın dönüm noktasıdır. Mustafa Kemal'e bu zafer sonrası Mareşal rütbesi ve Gazi unvanı verilmiştir.",
+    "Büyük Taarruz, 26 Ağustos 1922 tarihinde başlamıştır. Mustafa Kemal komutasındaki Türk ordusu, Yunan kuvvetlerini yenilgiye uğratmıştır. Bu zafer, İzmir'in kurtuluşuyla sonuçlanmıştır.",
+    "Türkiye Büyük Millet Meclisi (TBMM), 23 Nisan 1920 tarihinde Ankara'da açılmıştır. Bu tarih, her yıl Ulusal Egemenlik ve Çocuk Bayramı olarak kutlanmaktadır. TBMM, milli iradenin tek temsilcisi olarak kurulmuştur.",
+    "Mudanya Mütarekesi, 11 Ekim 1922 tarihinde imzalanmıştır. Bu antlaşma ile Doğu Trakya savaş yapılmadan Türkiye'ye bırakılmıştır. Mütareke, Kurtuluş Savaşı'nın askeri safhasını sona erdirmiştir.",
+    "Saltanat, 1 Kasım 1922 tarihinde TBMM tarafından kaldırılmıştır. Son Osmanlı padişahı VI. Mehmet Vahdettin ülkeyi terk etmiştir. Bu karar, cumhuriyete giden yolda önemli bir adım olmuştur.",
+    "Yapay zeka (AI), insan zekasını taklit eden ve öğrenme, problem çözme, karar verme gibi görevleri gerçekleştirebilen bilgisayar sistemleridir. Makine öğrenimi ve derin öğrenme, yapay zekanın alt dallarıdır. Günümüzde sağlık, finans ve ulaşım gibi birçok alanda kullanılmaktadır.",
+    "Makine öğrenimi, verilerdeki kalıpları öğrenen algoritmalar kullanır. Derin öğrenme ise yapay sinir ağları kullanan makine öğreniminin bir alt dalıdır. Derin öğrenme, görüntü ve ses tanıma gibi karmaşık görevlerde daha başarılıdır.",
+    "Blockchain, verilerin dağıtık bir ağda şifreli bloklar halinde saklandığı bir teknolojidir. Her blok, önceki bloğun hash değerini içerir ve bu zincirleme yapı değiştirilmeyi zorlaştırır. Bitcoin ve diğer kripto paralar bu teknoloji üzerine kurulmuştur.",
+    "5G, beşinci nesil mobil iletişim teknolojisidir. 4G'ye göre 100 kat daha hızlı veri aktarımı sağlar ve gecikme süresi 1 milisaniyenin altındadır. Akıllı şehirler, otonom araçlar ve IoT cihazları için kritik öneme sahiptir.",
+    "Kuantum bilgisayar, klasik bilgisayarların aksine kuantum mekaniği prensiplerini kullanan bir hesaplama cihazıdır. Kübitler, aynı anda 0 ve 1 değerini alabilir (süperpozisyon). Bu özellik, bazı problemleri çok daha hızlı çözmelerini sağlar.",
+    "Nesnelerin İnterneti (IoT), günlük nesnelerin internete bağlanarak veri toplayıp paylaşabildiği bir ağ yapısıdır. Akıllı ev cihazları, giyilebilir teknolojiler ve endüstriyel sensörler IoT örnekleridir. 2025 yılına kadar 75 milyar IoT cihazı olması beklenmektedir.",
+    "Bulut bilişim, bilgi işlem kaynaklarının internet üzerinden sunulmasıdır. Sunucular, depolama, veritabanları ve yazılımlar uzak veri merkezlerinde barındırılır. AWS, Azure ve Google Cloud en büyük bulut sağlayıcılarıdır.",
+    "Siber güvenlik, bilgisayar sistemlerini, ağları ve verileri yetkisiz erişimden koruma pratiğidir. Dijitalleşme arttıkça siber saldırılar da artmaktadır. Kimlik hırsızlığı, fidye yazılımları ve veri ihlalleri en yaygın tehditlerdir.",
+    "Artırılmış gerçeklik (AR), dijital içeriği gerçek dünya görüntüsü üzerine ekler. Sanal gerçeklik (VR) ise kullanıcıyı tamamen yapay bir ortama taşır. AR telefonlarda kullanılabilirken, VR için özel başlık gerekir.",
+    "Otonom araçlar, sensörler, kameralar, radar ve yapay zeka kullanarak sürücüsüz hareket edebilen taşıtlardır. LIDAR teknolojisi çevreyi 3D olarak tarar. Seviye 5 otonom araçlar hiçbir insan müdahalesi gerektirmez.",
+    "Büyük veri, geleneksel yöntemlerle işlenemeyecek kadar büyük ve karmaşık veri kümelerini ifade eder. Hacim, hız ve çeşitlilik (3V) büyük verinin temel özellikleridir. Hadoop ve Spark gibi araçlar büyük veri işlemek için kullanılır.",
+    "API (Application Programming Interface), farklı yazılım uygulamalarının birbirleriyle iletişim kurmasını sağlayan bir ara yüzdür. REST API'ler web servislerinde yaygın olarak kullanılır. Uygulamalar API'ler aracılığıyla veri paylaşır ve işlevsellik sunar.",
+    "Docker, uygulamaları konteyner adı verilen izole ortamlarda paketleyip çalıştırmayı sağlar. Konteynerler, uygulamanın tüm bağımlılıklarını içerir ve her ortamda aynı şekilde çalışır. Kubernetes, konteynerleri orkestre etmek için kullanılır.",
+    "DevOps, yazılım geliştirme (Dev) ve BT operasyonları (Ops) arasındaki işbirliğini artıran bir kültür ve pratikler bütünüdür. CI/CD pipeline'ları otomatik test ve dağıtım sağlar. Amaç, yazılım teslimat sürecini hızlandırmaktır.",
+    "Microservices, bir uygulamayı küçük, bağımsız servisler olarak tasarlama yaklaşımıdır. Her servis tek bir iş fonksiyonuna odaklanır ve bağımsız olarak geliştirilebilir, dağıtılabilir. Netflix ve Amazon bu mimariyi başarıyla kullanmaktadır.",
+    "Edge computing, veri işlemeyi merkezi veri merkezlerinden ziyade veri kaynağına yakın yerlerde gerçekleştiren bir paradigmadır. Gecikmeyi azaltır ve bant genişliği kullanımını optimize eder. IoT ve otonom araçlar için kritiktir.",
+    "Doğal Dil İşleme (NLP), bilgisayarların insan dilini anlamasını ve üretmesini sağlayan yapay zeka dalıdır. Chatbotlar, çeviri sistemleri ve duygu analizi NLP uygulamalarıdır. GPT ve BERT popüler NLP modelleridir.",
+    "DNA (Deoksiribonükleik asit), canlıların genetik bilgisini taşıyan moleküldür. Çift sarmal yapısındadır ve adenin, guanin, sitozin, timin bazlarından oluşur. DNA, hücre bölünmesi sırasında kopyalanarak kalıtsal bilgiyi aktarır.",
+    "Kara delik, ışığın bile kaçamayacağı kadar güçlü yerçekimine sahip uzay-zaman bölgesidir. Büyük yıldızların çökmesiyle oluşur. Olay ufku, kara deliğin sınırını belirler ve bu sınırı geçen hiçbir şey geri dönemez.",
+    "Fotosentez, bitkilerin güneş ışığını kullanarak karbondioksit ve suyu glikoz ve oksijene dönüştürdüğü süreçtir. Kloroplastlardaki klorofil pigmenti ışığı emer. Bu süreç, dünya üzerindeki yaşamın temelini oluşturur.",
+    "Einstein'ın görelilik teorisi iki bölümden oluşur. Özel görelilik, ışık hızının sabit olduğunu ve kütle-enerji denkliğini (E=mc²) açıklar. Genel görelilik ise kütlenin uzay-zamanı büktüğünü ve yerçekimini bu eğrilik olarak tanımlar.",
+    "İklim değişikliğinin ana nedeni, fosil yakıtların yakılmasıyla atmosfere salınan sera gazlarıdır. Karbondioksit, metan ve azot oksit en önemli sera gazlarıdır. Bu gazlar, güneşten gelen ısının dünyadan kaçmasını engelleyerek küresel ısınmaya yol açar.",
+    "Evrim teorisi, türlerin zaman içinde doğal seçilim yoluyla değiştiğini açıklar. Charles Darwin bu teoriyi 1859'da ortaya koymuştur. Çevreye en iyi uyum sağlayan bireyler hayatta kalır ve özelliklerini gelecek nesillere aktarır.",
+    "Periyodik tablo, elementleri artan atom numarasına göre düzenler. Yatay satırlar (periyotlar) elektron kabuğu sayısını, dikey sütunlar (gruplar) benzer kimyasal özellikleri gösterir. Dmitri Mendeleev tabloyu 1869'da oluşturmuştur.",
+    "Beyin, milyarlarca nörondan oluşan ve vücudun kontrol merkezi olan organdır. Nöronlar, sinapslar aracılığıyla elektriksel ve kimyasal sinyaller iletir. Farklı beyin bölgeleri hareket, duygu, bellek ve düşünme gibi işlevleri kontrol eder.",
+    "Büyük Patlama teorisi, evrenin yaklaşık 13.8 milyar yıl önce aşırı yoğun ve sıcak bir noktadan genişlemeye başladığını açıklar. Kozmik mikrodalga arka plan ışıması bu teoriyi destekler. Evren hâlâ genişlemeye devam etmektedir.",
+    "Antibiyotikler, bakterileri öldüren veya çoğalmalarını engelleyen ilaçlardır. Penisilin ilk keşfedilen antibiyotiktir (1928). Antibiyotikler virüslere karşı etkisizdir ve aşırı kullanım direnç gelişimine yol açar.",
+    "Yerçekimi, kütleli cisimlerin birbirini çekmesidir. Newton'un evrensel çekim yasasına göre, çekim kuvveti kütlelerle doğru, mesafenin karesiyle ters orantılıdır. Yerçekimi, gezegenlerin yörüngede kalmasını sağlar.",
+    "Aşılar, zayıflatılmış veya ölü patojenler içerir ve bağışıklık sistemini eğitir. Vücut bu patojenlere karşı antikor üretir ve hafıza hücreleri oluşturur. Gerçek enfeksiyonda bağışıklık sistemi hızlı tepki verebilir.",
+    "Enzimler, biyolojik reaksiyonları hızlandıran protein katalizörlerdir. Her enzim belirli bir substrata özgüdür (anahtar-kilit modeli). Sindirim, metabolizma ve DNA replikasyonu gibi süreçlerde kritik rol oynarlar.",
+    "Ozon tabakası, stratosfer katmanında bulunan ve güneşin zararlı ultraviyole (UV) ışınlarını emen koruyucu bir tabakadır. CFC gazları ozon tabakasına zarar verir. Montreal Protokolü, ozon tabakasını korumak için imzalanmıştır.",
+    "İki ana hücre bölünmesi türü vardır: mitoz ve mayoz. Mitoz, vücut hücrelerinin bölünmesidir ve genetik olarak özdeş iki hücre üretir. Mayoz, üreme hücrelerinin oluşumunda gerçekleşir ve kromozom sayısını yarıya indirir.",
+    "Karbon döngüsü, karbonun atmosfer, okyanuslar, canlılar ve yer kabuğu arasındaki dolaşımıdır. Fotosentez karbonu bağlar, solunum ve yakma ise karbondioksit olarak serbest bırakır. Fosil yakıtların yakılması bu dengeyi bozar."
+  ],
+  "qa_pairs": [
+    {
+      "id": 1,
+      "question": "Osmanlı İmparatorluğu ne zaman kuruldu?",
+      "context": "Osmanlı İmparatorluğu, 1299 yılında Osman Bey tarafından Söğüt'te kurulmuştur. İmparatorluk, 623 yıl boyunca üç kıtada hüküm sürmüş ve 1922 yılında sona ermiştir. Osmanlı, tarihte en uzun süre ayakta kalan imparatorluklardan biridir.",
+      "ground_truth": "Osmanlı İmparatorluğu 1299 yılında Osman Bey tarafından kurulmuştur."
+    },
+    {
+      "id": 2,
+      "question": "İstanbul'un fethi hangi tarihte gerçekleşti?",
+      "context": "İstanbul'un fethi, 29 Mayıs 1453 tarihinde Fatih Sultan Mehmet komutasındaki Osmanlı ordusu tarafından gerçekleştirilmiştir. Bu olay, Orta Çağ'ın sonu ve Yeni Çağ'ın başlangıcı olarak kabul edilmektedir. Fetih, dünya tarihinin en önemli dönüm noktalarından biridir.",
+      "ground_truth": "İstanbul'un fethi 29 Mayıs 1453 tarihinde gerçekleşmiştir."
+    },
+    {
+      "id": 3,
+      "question": "Türkiye Cumhuriyeti ne zaman ilan edildi?",
+      "context": "Türkiye Cumhuriyeti, 29 Ekim 1923 tarihinde Mustafa Kemal Atatürk önderliğinde ilan edilmiştir. Bu tarih, her yıl Cumhuriyet Bayramı olarak kutlanmaktadır. Atatürk, cumhuriyetin ilk cumhurbaşkanı olmuştur.",
+      "ground_truth": "Türkiye Cumhuriyeti 29 Ekim 1923 tarihinde ilan edilmiştir."
+    },
+    {
+      "id": 4,
+      "question": "Kurtuluş Savaşı hangi yıllar arasında yapıldı?",
+      "context": "Türk Kurtuluş Savaşı, 1919-1923 yılları arasında yapılmıştır. Mustafa Kemal Atatürk liderliğindeki milli mücadele, işgalci güçlere karşı verilen bağımsızlık savaşıdır. Savaş, Lozan Antlaşması ile sona ermiştir.",
+      "ground_truth": "Kurtuluş Savaşı 1919-1923 yılları arasında yapılmıştır."
+    },
+    {
+      "id": 5,
+      "question": "Kanuni Sultan Süleyman kaç yıl padişahlık yaptı?",
+      "context": "Kanuni Sultan Süleyman, 1520-1566 yılları arasında toplam 46 yıl padişahlık yapmıştır. Bu dönem, Osmanlı İmparatorluğu'nun en parlak çağı olarak kabul edilir. Kanuni döneminde imparatorluk en geniş sınırlarına ulaşmıştır.",
+      "ground_truth": "Kanuni Sultan Süleyman 46 yıl padişahlık yapmıştır."
+    },
+    {
+      "id": 6,
+      "question": "Çanakkale Savaşı neden önemlidir?",
+      "context": "Çanakkale Savaşı, 1915-1916 yıllarında gerçekleşen ve Osmanlı İmparatorluğu'nun I. Dünya Savaşı'ndaki en önemli zaferlerinden biridir. Bu savaş, Mustafa Kemal'in askeri dehasını ortaya koymuş ve milli bilinçin uyanmasında kritik rol oynamıştır.",
+      "ground_truth": "Çanakkale Savaşı, Osmanlı'nın I. Dünya Savaşı'ndaki en önemli zaferlerinden biri olup milli bilinçin uyanmasında kritik rol oynamıştır."
+    },
+    {
+      "id": 7,
+      "question": "Selçuklu Devleti'nin başkenti neresidir?",
+      "context": "Anadolu Selçuklu Devleti'nin başkenti Konya'dır. Devlet, 1077-1308 yılları arasında Anadolu'da hüküm sürmüştür. Konya, bu dönemde önemli bir kültür ve sanat merkezi haline gelmiştir.",
+      "ground_truth": "Anadolu Selçuklu Devleti'nin başkenti Konya'dır."
+    },
+    {
+      "id": 8,
+      "question": "Malazgirt Savaşı ne zaman yapıldı?",
+      "context": "Malazgirt Savaşı, 26 Ağustos 1071 tarihinde Sultan Alparslan komutasındaki Selçuklu ordusu ile Bizans İmparatoru Romanos Diogenes komutasındaki Bizans ordusu arasında yapılmıştır. Bu zafer, Türklerin Anadolu'ya açılan kapısı olmuştur.",
+      "ground_truth": "Malazgirt Savaşı 26 Ağustos 1071 tarihinde yapılmıştır."
+    },
+    {
+      "id": 9,
+      "question": "Atatürk'ün doğum tarihi nedir?",
+      "context": "Mustafa Kemal Atatürk, 1881 yılında Selanik'te doğmuştur. Kesin doğum tarihi bilinmemekle birlikte, 19 Mayıs 1881 kabul edilmiştir. Atatürk, modern Türkiye'nin kurucusu ve ilk cumhurbaşkanıdır.",
+      "ground_truth": "Mustafa Kemal Atatürk 1881 yılında Selanik'te doğmuştur."
+    },
+    {
+      "id": 10,
+      "question": "Lozan Antlaşması ne zaman imzalandı?",
+      "context": "Lozan Antlaşması, 24 Temmuz 1923 tarihinde İsviçre'nin Lozan şehrinde imzalanmıştır. Bu antlaşma, Türkiye Cumhuriyeti'nin uluslararası alanda tanınmasını sağlamıştır. Sevr Antlaşması'nı geçersiz kılan önemli bir diplomatik zaferdir.",
+      "ground_truth": "Lozan Antlaşması 24 Temmuz 1923 tarihinde imzalanmıştır."
+    },
+    {
+      "id": 11,
+      "question": "Harf inkılabı ne zaman yapıldı?",
+      "context": "Harf inkılabı, 1 Kasım 1928 tarihinde kabul edilmiştir. Bu devrimle Arap alfabesinden Latin alfabesine geçilmiştir. Atatürk, bu değişikliğin eğitimi kolaylaştıracağına inanmıştır.",
+      "ground_truth": "Harf inkılabı 1 Kasım 1928 tarihinde kabul edilmiştir."
+    },
+    {
+      "id": 12,
+      "question": "Türk kadınlarına seçme ve seçilme hakkı ne zaman verildi?",
+      "context": "Türk kadınlarına belediye seçimlerinde oy kullanma hakkı 1930'da, milletvekili seçme ve seçilme hakkı ise 5 Aralık 1934'te verilmiştir. Türkiye, bu konuda birçok Avrupa ülkesinden önce davranmıştır.",
+      "ground_truth": "Türk kadınlarına milletvekili seçme ve seçilme hakkı 5 Aralık 1934'te verilmiştir."
+    },
+    {
+      "id": 13,
+      "question": "Sakarya Meydan Muharebesi ne zaman yapıldı?",
+      "context": "Sakarya Meydan Muharebesi, 23 Ağustos - 13 Eylül 1921 tarihleri arasında 22 gün 22 gece sürmüştür. Bu savaş, Kurtuluş Savaşı'nın dönüm noktasıdır. Mustafa Kemal'e bu zafer sonrası Mareşal rütbesi ve Gazi unvanı verilmiştir.",
+      "ground_truth": "Sakarya Meydan Muharebesi 23 Ağustos - 13 Eylül 1921 tarihleri arasında yapılmıştır."
+    },
+    {
+      "id": 14,
+      "question": "Büyük Taarruz ne zaman başladı?",
+      "context": "Büyük Taarruz, 26 Ağustos 1922 tarihinde başlamıştır. Mustafa Kemal komutasındaki Türk ordusu, Yunan kuvvetlerini yenilgiye uğratmıştır. Bu zafer, İzmir'in kurtuluşuyla sonuçlanmıştır.",
+      "ground_truth": "Büyük Taarruz 26 Ağustos 1922 tarihinde başlamıştır."
+    },
+    {
+      "id": 15,
+      "question": "TBMM ne zaman açıldı?",
+      "context": "Türkiye Büyük Millet Meclisi (TBMM), 23 Nisan 1920 tarihinde Ankara'da açılmıştır. Bu tarih, her yıl Ulusal Egemenlik ve Çocuk Bayramı olarak kutlanmaktadır. TBMM, milli iradenin tek temsilcisi olarak kurulmuştur.",
+      "ground_truth": "TBMM 23 Nisan 1920 tarihinde Ankara'da açılmıştır."
+    },
+    {
+      "id": 16,
+      "question": "Mudanya Mütarekesi ne zaman imzalandı?",
+      "context": "Mudanya Mütarekesi, 11 Ekim 1922 tarihinde imzalanmıştır. Bu antlaşma ile Doğu Trakya savaş yapılmadan Türkiye'ye bırakılmıştır. Mütareke, Kurtuluş Savaşı'nın askeri safhasını sona erdirmiştir.",
+      "ground_truth": "Mudanya Mütarekesi 11 Ekim 1922 tarihinde imzalanmıştır."
+    },
+    {
+      "id": 17,
+      "question": "Saltanat ne zaman kaldırıldı?",
+      "context": "Saltanat, 1 Kasım 1922 tarihinde TBMM tarafından kaldırılmıştır. Son Osmanlı padişahı VI. Mehmet Vahdettin ülkeyi terk etmiştir. Bu karar, cumhuriyete giden yolda önemli bir adım olmuştur.",
+      "ground_truth": "Saltanat 1 Kasım 1922 tarihinde kaldırılmıştır."
+    },
+    {
+      "id": 18,
+      "question": "Yapay zeka nedir?",
+      "context": "Yapay zeka (AI), insan zekasını taklit eden ve öğrenme, problem çözme, karar verme gibi görevleri gerçekleştirebilen bilgisayar sistemleridir. Makine öğrenimi ve derin öğrenme, yapay zekanın alt dallarıdır. Günümüzde sağlık, finans ve ulaşım gibi birçok alanda kullanılmaktadır.",
+      "ground_truth": "Yapay zeka, insan zekasını taklit eden ve öğrenme, problem çözme, karar verme gibi görevleri gerçekleştirebilen bilgisayar sistemleridir."
+    },
+    {
+      "id": 19,
+      "question": "Makine öğrenimi ve derin öğrenme arasındaki fark nedir?",
+      "context": "Makine öğrenimi, verilerdeki kalıpları öğrenen algoritmalar kullanır. Derin öğrenme ise yapay sinir ağları kullanan makine öğreniminin bir alt dalıdır. Derin öğrenme, görüntü ve ses tanıma gibi karmaşık görevlerde daha başarılıdır.",
+      "ground_truth": "Derin öğrenme, yapay sinir ağları kullanan makine öğreniminin bir alt dalıdır ve karmaşık görevlerde daha başarılıdır."
+    },
+    {
+      "id": 20,
+      "question": "Blockchain teknolojisi nasıl çalışır?",
+      "context": "Blockchain, verilerin dağıtık bir ağda şifreli bloklar halinde saklandığı bir teknolojidir. Her blok, önceki bloğun hash değerini içerir ve bu zincirleme yapı değiştirilmeyi zorlaştırır. Bitcoin ve diğer kripto paralar bu teknoloji üzerine kurulmuştur.",
+      "ground_truth": "Blockchain, verilerin dağıtık bir ağda şifreli bloklar halinde saklandığı ve her bloğun önceki bloğun hash değerini içerdiği bir teknolojidir."
+    },
+    {
+      "id": 21,
+      "question": "5G teknolojisinin özellikleri nelerdir?",
+      "context": "5G, beşinci nesil mobil iletişim teknolojisidir. 4G'ye göre 100 kat daha hızlı veri aktarımı sağlar ve gecikme süresi 1 milisaniyenin altındadır. Akıllı şehirler, otonom araçlar ve IoT cihazları için kritik öneme sahiptir.",
+      "ground_truth": "5G, 4G'ye göre 100 kat daha hızlı veri aktarımı sağlayan ve 1 milisaniyenin altında gecikme süresi olan beşinci nesil mobil iletişim teknolojisidir."
+    },
+    {
+      "id": 22,
+      "question": "Kuantum bilgisayar nedir?",
+      "context": "Kuantum bilgisayar, klasik bilgisayarların aksine kuantum mekaniği prensiplerini kullanan bir hesaplama cihazıdır. Kübitler, aynı anda 0 ve 1 değerini alabilir (süperpozisyon). Bu özellik, bazı problemleri çok daha hızlı çözmelerini sağlar.",
+      "ground_truth": "Kuantum bilgisayar, kuantum mekaniği prensiplerini kullanarak kübitlerle hesaplama yapan ve bazı problemleri çok daha hızlı çözebilen bir cihazdır."
+    },
+    {
+      "id": 23,
+      "question": "Nesnelerin İnterneti (IoT) ne demek?",
+      "context": "Nesnelerin İnterneti (IoT), günlük nesnelerin internete bağlanarak veri toplayıp paylaşabildiği bir ağ yapısıdır. Akıllı ev cihazları, giyilebilir teknolojiler ve endüstriyel sensörler IoT örnekleridir. 2025 yılına kadar 75 milyar IoT cihazı olması beklenmektedir.",
+      "ground_truth": "IoT, günlük nesnelerin internete bağlanarak veri toplayıp paylaşabildiği bir ağ yapısıdır."
+    },
+    {
+      "id": 24,
+      "question": "Bulut bilişim ne anlama gelir?",
+      "context": "Bulut bilişim, bilgi işlem kaynaklarının internet üzerinden sunulmasıdır. Sunucular, depolama, veritabanları ve yazılımlar uzak veri merkezlerinde barındırılır. AWS, Azure ve Google Cloud en büyük bulut sağlayıcılarıdır.",
+      "ground_truth": "Bulut bilişim, sunucular, depolama, veritabanları ve yazılımlar gibi bilgi işlem kaynaklarının internet üzerinden sunulmasıdır."
+    },
+    {
+      "id": 25,
+      "question": "Siber güvenlik neden önemlidir?",
+      "context": "Siber güvenlik, bilgisayar sistemlerini, ağları ve verileri yetkisiz erişimden koruma pratiğidir. Dijitalleşme arttıkça siber saldırılar da artmaktadır. Kimlik hırsızlığı, fidye yazılımları ve veri ihlalleri en yaygın tehditlerdir.",
+      "ground_truth": "Siber güvenlik, bilgisayar sistemlerini, ağları ve verileri yetkisiz erişimden koruma pratiğidir ve dijitalleşme arttıkça önemi artmaktadır."
+    },
+    {
+      "id": 26,
+      "question": "Artırılmış gerçeklik (AR) ve sanal gerçeklik (VR) farkı nedir?",
+      "context": "Artırılmış gerçeklik (AR), dijital içeriği gerçek dünya görüntüsü üzerine ekler. Sanal gerçeklik (VR) ise kullanıcıyı tamamen yapay bir ortama taşır. AR telefonlarda kullanılabilirken, VR için özel başlık gerekir.",
+      "ground_truth": "AR dijital içeriği gerçek dünya üzerine eklerken, VR kullanıcıyı tamamen yapay bir ortama taşır."
+    },
+    {
+      "id": 27,
+      "question": "Otonom araçlar nasıl çalışır?",
+      "context": "Otonom araçlar, sensörler, kameralar, radar ve yapay zeka kullanarak sürücüsüz hareket edebilen taşıtlardır. LIDAR teknolojisi çevreyi 3D olarak tarar. Seviye 5 otonom araçlar hiçbir insan müdahalesi gerektirmez.",
+      "ground_truth": "Otonom araçlar, sensörler, kameralar, radar ve yapay zeka kullanarak sürücüsüz hareket edebilen taşıtlardır."
+    },
+    {
+      "id": 28,
+      "question": "Büyük veri (Big Data) nedir?",
+      "context": "Büyük veri, geleneksel yöntemlerle işlenemeyecek kadar büyük ve karmaşık veri kümelerini ifade eder. Hacim, hız ve çeşitlilik (3V) büyük verinin temel özellikleridir. Hadoop ve Spark gibi araçlar büyük veri işlemek için kullanılır.",
+      "ground_truth": "Büyük veri, geleneksel yöntemlerle işlenemeyecek kadar büyük ve karmaşık veri kümeleridir ve hacim, hız, çeşitlilik temel özellikleridir."
+    },
+    {
+      "id": 29,
+      "question": "API nedir ve ne işe yarar?",
+      "context": "API (Application Programming Interface), farklı yazılım uygulamalarının birbirleriyle iletişim kurmasını sağlayan bir ara yüzdür. REST API'ler web servislerinde yaygın olarak kullanılır. Uygulamalar API'ler aracılığıyla veri paylaşır ve işlevsellik sunar.",
+      "ground_truth": "API, farklı yazılım uygulamalarının birbirleriyle iletişim kurmasını sağlayan bir ara yüzdür."
+    },
+    {
+      "id": 30,
+      "question": "Konteyner teknolojisi (Docker) ne sağlar?",
+      "context": "Docker, uygulamaları konteyner adı verilen izole ortamlarda paketleyip çalıştırmayı sağlar. Konteynerler, uygulamanın tüm bağımlılıklarını içerir ve her ortamda aynı şekilde çalışır. Kubernetes, konteynerleri orkestre etmek için kullanılır.",
+      "ground_truth": "Docker, uygulamaları konteyner adı verilen izole ortamlarda paketleyip bağımlılıklarıyla birlikte her ortamda aynı şekilde çalıştırmayı sağlar."
+    },
+    {
+      "id": 31,
+      "question": "DevOps yaklaşımı nedir?",
+      "context": "DevOps, yazılım geliştirme (Dev) ve BT operasyonları (Ops) arasındaki işbirliğini artıran bir kültür ve pratikler bütünüdür. CI/CD pipeline'ları otomatik test ve dağıtım sağlar. Amaç, yazılım teslimat sürecini hızlandırmaktır.",
+      "ground_truth": "DevOps, yazılım geliştirme ve BT operasyonları arasındaki işbirliğini artıran ve yazılım teslimat sürecini hızlandıran bir kültür ve pratikler bütünüdür."
+    },
+    {
+      "id": 32,
+      "question": "Microservices mimarisi nedir?",
+      "context": "Microservices, bir uygulamayı küçük, bağımsız servisler olarak tasarlama yaklaşımıdır. Her servis tek bir iş fonksiyonuna odaklanır ve bağımsız olarak geliştirilebilir, dağıtılabilir. Netflix ve Amazon bu mimariyi başarıyla kullanmaktadır.",
+      "ground_truth": "Microservices, bir uygulamayı bağımsız olarak geliştirilebilen ve dağıtılabilen küçük servisler olarak tasarlama yaklaşımıdır."
+    },
+    {
+      "id": 33,
+      "question": "Edge computing nedir?",
+      "context": "Edge computing, veri işlemeyi merkezi veri merkezlerinden ziyade veri kaynağına yakın yerlerde gerçekleştiren bir paradigmadır. Gecikmeyi azaltır ve bant genişliği kullanımını optimize eder. IoT ve otonom araçlar için kritiktir.",
+      "ground_truth": "Edge computing, veri işlemeyi veri kaynağına yakın yerlerde gerçekleştirerek gecikmeyi azaltan ve bant genişliğini optimize eden bir paradigmadır."
+    },
+    {
+      "id": 34,
+      "question": "Doğal Dil İşleme (NLP) ne yapar?",
+      "context": "Doğal Dil İşleme (NLP), bilgisayarların insan dilini anlamasını ve üretmesini sağlayan yapay zeka dalıdır. Chatbotlar, çeviri sistemleri ve duygu analizi NLP uygulamalarıdır. GPT ve BERT popüler NLP modelleridir.",
+      "ground_truth": "NLP, bilgisayarların insan dilini anlamasını ve üretmesini sağlayan yapay zeka dalıdır."
+    },
+    {
+      "id": 35,
+      "question": "DNA nedir ve işlevi nedir?",
+      "context": "DNA (Deoksiribonükleik asit), canlıların genetik bilgisini taşıyan moleküldür. Çift sarmal yapısındadır ve adenin, guanin, sitozin, timin bazlarından oluşur. DNA, hücre bölünmesi sırasında kopyalanarak kalıtsal bilgiyi aktarır.",
+      "ground_truth": "DNA, canlıların genetik bilgisini taşıyan çift sarmal yapısında bir moleküldür."
+    },
+    {
+      "id": 36,
+      "question": "Kara delik nedir?",
+      "context": "Kara delik, ışığın bile kaçamayacağı kadar güçlü yerçekimine sahip uzay-zaman bölgesidir. Büyük yıldızların çökmesiyle oluşur. Olay ufku, kara deliğin sınırını belirler ve bu sınırı geçen hiçbir şey geri dönemez.",
+      "ground_truth": "Kara delik, ışığın bile kaçamayacağı kadar güçlü yerçekimine sahip uzay-zaman bölgesidir."
+    },
+    {
+      "id": 37,
+      "question": "Fotosentez nasıl gerçekleşir?",
+      "context": "Fotosentez, bitkilerin güneş ışığını kullanarak karbondioksit ve suyu glikoz ve oksijene dönüştürdüğü süreçtir. Kloroplastlardaki klorofil pigmenti ışığı emer. Bu süreç, dünya üzerindeki yaşamın temelini oluşturur.",
+      "ground_truth": "Fotosentez, bitkilerin güneş ışığını kullanarak karbondioksit ve suyu glikoz ve oksijene dönüştürdüğü süreçtir."
+    },
+    {
+      "id": 38,
+      "question": "Einstein'ın görelilik teorisi ne anlatır?",
+      "context": "Einstein'ın görelilik teorisi iki bölümden oluşur. Özel görelilik, ışık hızının sabit olduğunu ve kütle-enerji denkliğini (E=mc²) açıklar. Genel görelilik ise kütlenin uzay-zamanı büktüğünü ve yerçekimini bu eğrilik olarak tanımlar.",
+      "ground_truth": "Einstein'ın görelilik teorisi, ışık hızının sabitliğini, kütle-enerji denkliğini ve kütlenin uzay-zamanı büktüğünü açıklar."
+    },
+    {
+      "id": 39,
+      "question": "İklim değişikliğinin ana nedeni nedir?",
+      "context": "İklim değişikliğinin ana nedeni, fosil yakıtların yakılmasıyla atmosfere salınan sera gazlarıdır. Karbondioksit, metan ve azot oksit en önemli sera gazlarıdır. Bu gazlar, güneşten gelen ısının dünyadan kaçmasını engelleyerek küresel ısınmaya yol açar.",
+      "ground_truth": "İklim değişikliğinin ana nedeni, fosil yakıtların yakılmasıyla atmosfere salınan sera gazlarıdır."
+    },
+    {
+      "id": 40,
+      "question": "Evrim teorisi neyi açıklar?",
+      "context": "Evrim teorisi, türlerin zaman içinde doğal seçilim yoluyla değiştiğini açıklar. Charles Darwin bu teoriyi 1859'da ortaya koymuştur. Çevreye en iyi uyum sağlayan bireyler hayatta kalır ve özelliklerini gelecek nesillere aktarır.",
+      "ground_truth": "Evrim teorisi, türlerin zaman içinde doğal seçilim yoluyla değiştiğini ve çevreye en iyi uyum sağlayanların hayatta kaldığını açıklar."
+    },
+    {
+      "id": 41,
+      "question": "Periyodik tablo nasıl düzenlenmiştir?",
+      "context": "Periyodik tablo, elementleri artan atom numarasına göre düzenler. Yatay satırlar (periyotlar) elektron kabuğu sayısını, dikey sütunlar (gruplar) benzer kimyasal özellikleri gösterir. Dmitri Mendeleev tabloyu 1869'da oluşturmuştur.",
+      "ground_truth": "Periyodik tablo, elementleri artan atom numarasına göre düzenler ve benzer özellikli elementleri gruplar halinde sınıflandırır."
+    },
+    {
+      "id": 42,
+      "question": "Beyin nasıl çalışır?",
+      "context": "Beyin, milyarlarca nörondan oluşan ve vücudun kontrol merkezi olan organdır. Nöronlar, sinapslar aracılığıyla elektriksel ve kimyasal sinyaller iletir. Farklı beyin bölgeleri hareket, duygu, bellek ve düşünme gibi işlevleri kontrol eder.",
+      "ground_truth": "Beyin, nöronların sinapslar aracılığıyla sinyal ilettiği ve hareket, duygu, bellek, düşünme gibi işlevleri kontrol eden organdır."
+    },
+    {
+      "id": 43,
+      "question": "Büyük Patlama (Big Bang) teorisi nedir?",
+      "context": "Büyük Patlama teorisi, evrenin yaklaşık 13.8 milyar yıl önce aşırı yoğun ve sıcak bir noktadan genişlemeye başladığını açıklar. Kozmik mikrodalga arka plan ışıması bu teoriyi destekler. Evren hâlâ genişlemeye devam etmektedir.",
+      "ground_truth": "Büyük Patlama teorisi, evrenin 13.8 milyar yıl önce aşırı yoğun ve sıcak bir noktadan genişlemeye başladığını açıklar."
+    },
+    {
+      "id": 44,
+      "question": "Antibiyotikler nasıl çalışır?",
+      "context": "Antibiyotikler, bakterileri öldüren veya çoğalmalarını engelleyen ilaçlardır. Penisilin ilk keşfedilen antibiyotiktir (1928). Antibiyotikler virüslere karşı etkisizdir ve aşırı kullanım direnç gelişimine yol açar.",
+      "ground_truth": "Antibiyotikler, bakterileri öldüren veya çoğalmalarını engelleyen ilaçlardır ve virüslere karşı etkisizdirler."
+    },
+    {
+      "id": 45,
+      "question": "Yerçekimi kuvveti nedir?",
+      "context": "Yerçekimi, kütleli cisimlerin birbirini çekmesidir. Newton'un evrensel çekim yasasına göre, çekim kuvveti kütlelerle doğru, mesafenin karesiyle ters orantılıdır. Yerçekimi, gezegenlerin yörüngede kalmasını sağlar.",
+      "ground_truth": "Yerçekimi, kütleli cisimlerin birbirini çektiği ve gezegenlerin yörüngede kalmasını sağlayan kuvvettir."
+    },
+    {
+      "id": 46,
+      "question": "Aşılar nasıl bağışıklık sağlar?",
+      "context": "Aşılar, zayıflatılmış veya ölü patojenler içerir ve bağışıklık sistemini eğitir. Vücut bu patojenlere karşı antikor üretir ve hafıza hücreleri oluşturur. Gerçek enfeksiyonda bağışıklık sistemi hızlı tepki verebilir.",
+      "ground_truth": "Aşılar, zayıflatılmış veya ölü patojenler içererek bağışıklık sistemini eğitir ve vücudun antikor üretmesini sağlar."
+    },
+    {
+      "id": 47,
+      "question": "Enzimlerin görevi nedir?",
+      "context": "Enzimler, biyolojik reaksiyonları hızlandıran protein katalizörlerdir. Her enzim belirli bir substrata özgüdür (anahtar-kilit modeli). Sindirim, metabolizma ve DNA replikasyonu gibi süreçlerde kritik rol oynarlar.",
+      "ground_truth": "Enzimler, biyolojik reaksiyonları hızlandıran ve belirli substratlara özgü protein katalizörlerdir."
+    },
+    {
+      "id": 48,
+      "question": "Ozon tabakası neden önemlidir?",
+      "context": "Ozon tabakası, stratosfer katmanında bulunan ve güneşin zararlı ultraviyole (UV) ışınlarını emen koruyucu bir tabakadır. CFC gazları ozon tabakasına zarar verir. Montreal Protokolü, ozon tabakasını korumak için imzalanmıştır.",
+      "ground_truth": "Ozon tabakası, güneşin zararlı ultraviyole ışınlarını emerek canlıları koruyan stratosfer tabakasıdır."
+    },
+    {
+      "id": 49,
+      "question": "Hücre bölünmesi türleri nelerdir?",
+      "context": "İki ana hücre bölünmesi türü vardır: mitoz ve mayoz. Mitoz, vücut hücrelerinin bölünmesidir ve genetik olarak özdeş iki hücre üretir. Mayoz, üreme hücrelerinin oluşumunda gerçekleşir ve kromozom sayısını yarıya indirir.",
+      "ground_truth": "İki ana hücre bölünmesi türü vardır: mitoz (özdeş hücreler üretir) ve mayoz (kromozom sayısını yarıya indirir)."
+    },
+    {
+      "id": 50,
+      "question": "Karbon döngüsü nedir?",
+      "context": "Karbon döngüsü, karbonun atmosfer, okyanuslar, canlılar ve yer kabuğu arasındaki dolaşımıdır. Fotosentez karbonu bağlar, solunum ve yakma ise karbondioksit olarak serbest bırakır. Fosil yakıtların yakılması bu dengeyi bozar.",
+      "ground_truth": "Karbon döngüsü, karbonun atmosfer, okyanuslar, canlılar ve yer kabuğu arasındaki dolaşımıdır."
+    }
+  ]
+}

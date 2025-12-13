@@ -1,0 +1,88 @@
+# RAG SaaS Platform - Python Bağımlılıkları
+# ==========================================
+# LangChain tabanlı profesyonel RAG pipeline
+
+# =============================================
+# LANGCHAIN FRAMEWORK
+# =============================================
+langchain>=0.1.0
+langchain-community>=0.0.20
+langchain-huggingface>=0.0.1
+
+# =============================================
+# DÖKÜMAN YÜKLEYİCİLER
+# =============================================
+# PDF işleme
+pypdf>=3.17.0
+
+# Word dosyaları
+docx2txt>=0.8
+
+# Web scraping
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# =============================================
+# VEKTÖR VERİTABANI
+# =============================================
+# FAISS - Facebook AI Similarity Search
+faiss-cpu>=1.7.4
+
+# =============================================
+# EMBEDDING & TRANSFORMERS
+# =============================================
+# PyTorch
+torch>=2.0.0
+
+# HuggingFace Transformers
+transformers>=4.30.0
+
+# Sentence Transformers - Embedding modeli
+sentence-transformers>=2.2.0
+
+# HuggingFace Hub
+huggingface_hub[hf_xet]>=0.20.0
+
+# =============================================
+# OPENAI API
+# =============================================
+openai>=1.3.0
+
+# =============================================
+# DEĞERLENDİRME METRİKLERİ
+# =============================================
+# Scikit-learn (F1, Accuracy, vb.)
+scikit-learn>=1.3.0
+
+# ROUGE skoru
+rouge-score>=0.1.2
+
+# =============================================
+# GÖRSELLEŞTİRME
+# =============================================
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# =============================================
+# NLP ARAÇLARI
+# =============================================
+nltk>=3.8.0
+
+# =============================================
+# VERİ İŞLEME
+# =============================================
+numpy>=1.24.0
+pandas>=2.0.0
+tqdm>=4.65.0
+
+# =============================================
+# YARDIMCI KÜTÜPHANELER
+# =============================================
+# Ortam değişkenleri
+python-dotenv>=1.0.0
+
+# Hızlı JSON
+orjson>=3.9.0
+
+# Tip kontrolü
+typing-extensions>=4.5.0
