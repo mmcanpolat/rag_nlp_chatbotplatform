@@ -1,179 +1,99 @@
-# 🤖 BİL482 Intelligent RAG Platform
+# RAG SaaS Platform - Python Versiyonu
 
-A SaaS-style Chatbot & Analytics System for comparing AI models using RAG (Retrieval-Augmented Generation).
+**100% Python - FastAPI + Streamlit**
 
-![Angular](https://img.shields.io/badge/Angular-17+-red?style=flat-square&logo=angular)
-![Node.js](https://img.shields.io/badge/Node.js-20+-green?style=flat-square&logo=node.js)
-![Python](https://img.shields.io/badge/Python-3.10+-blue?style=flat-square&logo=python)
+Akıllı RAG (Retrieval-Augmented Generation) tabanlı SaaS chatbot platformu. Şirketler kendi chatbot'larını oluşturup veri setlerini yükleyebilir, akademik metriklerle değerlendirme yapabilir.
 
-## 🎯 Features
+## 🎯 Özellikler
 
-- **3 AI Models to Compare:**
-  - 🧠 **GPT-4o-mini** (Generative RAG via OpenAI API)
-  - 🔤 **BERT Turkish** (Extractive QA via HuggingFace)
-  - 📊 **TF-IDF Baseline** (Traditional IR approach)
+- ✅ **Backend:** FastAPI (Python)
+- ✅ **Frontend:** Streamlit (Python)
+- ✅ **RAG Engine:** LangChain + FAISS
+- ✅ **Modeller:** GPT-4o-mini, BERT Turkish Cased, BERT Turkish Sentiment
+- ✅ **Değerlendirme:** Cosine Similarity, ROUGE-L, BLEU, F1 Score, Accuracy
+- ✅ **Colab Uyumlu:** Tek dil, kolay kurulum
 
-- **4 Academic Evaluation Metrics:**
-  - Cosine Similarity (semantic similarity)
-  - ROUGE-L (n-gram overlap)
-  - BLEU (generation precision)
-  - Accuracy with Confusion Matrix
-
-- **Snow White UI Theme:**
-  - Clean, modern SaaS design
-  - Responsive Angular 17 frontend
-  - Beautiful data visualizations
-
-## 📁 Project Structure
+## 📁 Proje Yapısı
 
 ```
 bil482-project/
-├── backend/                 # Node.js Express API
-│   ├── server.js           # Main server file
-│   └── config.js           # Configuration
-├── python_services/         # Python ML Services
+├── backend_fastapi/          # FastAPI Backend
+│   ├── main.py              # API endpoints
+│   └── run.py               # Başlatma scripti
+├── frontend_streamlit/       # Streamlit Frontend
+│   ├── app.py               # Streamlit UI
+│   └── run.py               # Başlatma scripti
+├── python_services/          # RAG Servisleri
 │   ├── scripts/
-│   │   ├── data_ingestion.py   # Data & FAISS index builder
-│   │   ├── rag_core.py         # RAG chatbot engine
-│   │   └── evaluator.py        # Benchmark & metrics
-│   ├── data/
-│   │   ├── knowledge_base.json # Turkish QA dataset
-│   │   └── faiss_index/        # Vector database
-│   └── requirements.txt
-├── frontend/                # Angular 17 SPA
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── features/chat/      # Chat interface
-│   │   │   ├── features/analytics/ # Metrics dashboard
-│   │   │   └── shared/components/  # Reusable UI
-│   │   └── assets/plots/   # Generated visualizations
-│   └── tailwind.config.js
+│   │   ├── rag_engine.py    # RAG motoru
+│   │   ├── ingestor.py      # Döküman işleme
+│   │   └── evaluator.py     # Model değerlendirme
+│   └── requirements.txt     # Python bağımlılıkları
 ├── notebooks/
-│   └── colab_setup.ipynb   # Google Colab runner
-└── package.json
+│   └── colab_setup_python.ipynb  # Colab kurulum
+└── archived_js/             # Eski JavaScript dosyaları (arşiv)
 ```
 
-## 🚀 Quick Start
+## 🚀 Kurulum
 
-### Option 1: Google Colab (Recommended)
-
-1. Upload the project to Google Colab
-2. Open `notebooks/colab_setup.ipynb`
-3. Follow the step-by-step cells
-4. Access via ngrok public URL
-
-### Option 2: Local Development
+### Local
 
 ```bash
-# 1. Install Python dependencies
+# 1. Bağımlılıkları kur
 cd python_services
 pip install -r requirements.txt
 
-# 2. Initialize data
-python scripts/data_ingestion.py
+# 2. API Key ayarla
+echo "OPENAI_API_KEY=sk-proj-BURAYA-KEY" > backend_fastapi/.env
+echo "OPENAI_API_KEY=sk-proj-BURAYA-KEY" > python_services/.env
 
-# 3. Install Node.js dependencies
-cd ..
-npm install
-cd frontend && npm install
+# 3. Backend başlat (Terminal 1)
+cd backend_fastapi
+python run.py
 
-# 4. Set OpenAI API key
-export OPENAI_API_KEY="your-api-key"
-
-# 5. Start backend (terminal 1)
-npm start
-
-# 6. Start frontend (terminal 2)
-cd frontend && ng serve
+# 4. Frontend başlat (Terminal 2)
+cd frontend_streamlit
+streamlit run app.py
 ```
 
-Visit `http://localhost:4200`
+### Colab
 
-## 🔑 Environment Variables
+1. `notebooks/colab_setup_python.ipynb` dosyasını aç
+2. Tüm hücreleri sırayla çalıştır
+3. Public URL al (Colab port forwarding veya localtunnel)
 
-Create a `.env` file in the `backend/` directory:
+## 🔑 Giriş Bilgileri
 
-```env
-OPENAI_API_KEY=sk-your-openai-api-key
-PORT=3000
-NODE_ENV=development
-```
+- **Email:** `admin@ragplatform.com`
+- **Şifre:** `Admin123!@#`
 
 ## 📊 API Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/health` | GET | Health check |
-| `/api/chat` | POST | Query RAG system |
-| `/api/benchmark` | POST | Run evaluation |
-| `/api/benchmark/results` | GET | Get cached results |
-| `/api/stats` | GET | Knowledge base stats |
-| `/api/plots` | GET | List generated plots |
-| `/api/init` | POST | Initialize data |
+- `POST /api/auth/login` - Giriş
+- `POST /api/auth/logout` - Çıkış
+- `GET /api/admin/companies` - Şirket listesi (SuperAdmin)
+- `POST /api/admin/companies` - Şirket oluştur (SuperAdmin)
+- `GET /api/agents` - Agent listesi
+- `POST /api/agents` - Agent oluştur
+- `POST /api/chat` - Chat sorgusu
+- `POST /api/upload` - Dosya yükleme
+- `POST /api/benchmark` - Benchmark çalıştır
 
-## 🧪 Running Benchmarks
+## 💡 Teknik Detaylar
 
-```bash
-cd python_services
-python scripts/evaluator.py
-```
+- **Embedding Modelleri:** `paraphrase-multilingual-MiniLM-L12-v2`, `text-embedding-3-large`
+- **Vector DB:** FAISS
+- **Chunk Size:** 750 karakter, 100 overlap
+- **Top-K Retrieval:** 3 chunk
+- **Değerlendirme Metrikleri:** Cosine Similarity, ROUGE-L, BLEU, F1, Accuracy
 
-This will:
-- Evaluate all 50 QA pairs with each model
-- Calculate Cosine Similarity, ROUGE-L, BLEU scores
-- Generate accuracy metrics and confusion matrices
-- Save plots to `frontend/src/assets/plots/`
+## 📝 Notlar
 
-## 📈 Sample Results
+- Tüm veriler memory'de tutuluyor (production için veritabanı eklenebilir)
+- Session token'lar memory'de saklanıyor
+- FAISS index'leri `python_services/data/faiss_index/` altında
+- Grafikler `frontend_streamlit/assets/plots/` altına kaydediliyor
 
-| Model | Accuracy | BLEU | Response Time |
-|-------|----------|------|---------------|
-| GPT-4o-mini | ~85% | ~0.45 | ~1500ms |
-| BERT-Turkish | ~70% | ~0.35 | ~200ms |
-| TF-IDF | ~55% | ~0.25 | ~5ms |
+## 🔄 Eski Versiyon
 
-*Results vary based on query complexity and API latency.*
-
-## 🎨 Design System
-
-The "Snow White" theme uses:
-
-- **Background:** `#F8FAFC` (slate-50)
-- **Cards:** `#FFFFFF` with soft shadows
-- **Primary:** `#3B82F6` (Royal Blue)
-- **Text:** `#1E293B` / `#64748B`
-- **Font:** DM Sans, Sora (display)
-
-## 📚 Dataset
-
-50 Turkish QA pairs covering:
-- 🏛️ **History** (17 pairs): Ottoman, Republic, Atatürk
-- 💻 **Technology** (17 pairs): AI, Blockchain, Cloud
-- 🔬 **Science** (16 pairs): Biology, Physics, Chemistry
-
-## 🛠️ Technologies
-
-**Frontend:**
-- Angular 17 (Standalone Components, Signals)
-- Tailwind CSS 3.4
-- TypeScript 5.4
-
-**Backend:**
-- Node.js 20 / Express 4
-- Python 3.10+
-- PyTorch, Transformers, FAISS
-
-**AI/ML:**
-- OpenAI GPT-4o-mini
-- HuggingFace Transformers
-- Sentence-Transformers
-- FAISS (Facebook AI Similarity Search)
-
-## 📄 License
-
-MIT License - University Project 2024
-
----
-
-**BİL482 - Natural Language Processing Final Project**
-
+JavaScript versiyonu (Node.js + Angular) `archived_js/` klasöründe arşivlenmiş durumda.

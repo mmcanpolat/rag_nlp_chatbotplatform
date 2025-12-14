@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# RAG soru-cevap motoru
-# FAISS'ten ilgili dökümanları çekip modele veriyor
+# RAG engine - soru gelince FAISS'ten ilgili dökümanları bulup modele veriyorum
+# GPT için OpenAI API kullanıyorum, BERT'ler için basit kelime eşleştirmesi yapıyorum
 
 import argparse
 import json
@@ -19,35 +19,35 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from openai import OpenAI
 
-# dizin ayarları
+# Dizin ayarları - FAISS index'leri burada tutuluyor
 BASE_DIR = Path(__file__).parent.parent
 INDEX_DIR = BASE_DIR / "data" / "faiss_index"
 
-# default embedding - index metadata'dan da alınabilir
+# Default embedding modeli - index metadata'sından da alabilirim ama şimdilik bu
 DEFAULT_EMBEDDING = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 
 
 class RAGEngine:
-    # soru gelince FAISS'ten context çekip modele soruyor
-    # GPT için OpenAI API, BERT'ler için basit kelime eşleştirmesi
+    # RAG motoru - soru gelince FAISS'ten context çekip modele veriyorum
+    # GPT için OpenAI API kullanıyorum, BERT modelleri için basit kelime eşleştirmesi yapıyorum
     
     def __init__(self, index_name: str = "default"):
         self.index_name = index_name
         self.index_path = INDEX_DIR / index_name
-        self.vectorstore = None
-        self._embeddings = None
-        self.openai_client = None
+        self.vectorstore = None  # FAISS index'i buraya yüklenecek
+        self._embeddings = None  # Lazy load yapıyorum, gerektiğinde yükleniyor
+        self.openai_client = None  # OpenAI client'ı
         
         self._setup()
     
     @property
     def embeddings(self):
-        # embedding modeli - lazy load
-        # GPU varsa otomatik kullan, yoksa CPU
+        # Embedding modelini lazy load yapıyorum - ilk kullanımda yükleniyor
+        # GPU varsa otomatik kullanıyor, yoksa CPU'ya düşüyor
         if self._embeddings is None:
             import torch
             device = 'cuda' if torch.cuda.is_available() else 'cpu'
-            # önce index metadata'sından model adını al
+            # Index metadata'sından hangi embedding model kullanıldığını alıyorum
             embedding_model = self._get_embedding_model_from_index()
             print(f"[*] Embedding modeli yükleniyor: {embedding_model} ({device})")
             self._embeddings = HuggingFaceEmbeddings(
@@ -58,7 +58,8 @@ class RAGEngine:
         return self._embeddings
     
     def _get_embedding_model_from_index(self) -> str:
-        # index metadata'sından embedding model adını al
+        # Index oluşturulurken hangi embedding model kullanıldıysa onu alıyorum
+        # metadata.json dosyasında saklanıyor
         meta_file = self.index_path / "metadata.json"
         if meta_file.exists():
             try:
@@ -70,13 +71,13 @@ class RAGEngine:
         return DEFAULT_EMBEDDING
     
     def _setup(self):
-        # başlangıç yüklemeleri
+        # Başlangıçta FAISS'i yüklüyorum ve OpenAI client'ı hazırlıyorum
         print("[*] RAG engine başlatılıyor...")
         
-        # FAISS yükle
+        # FAISS index'ini yüklüyorum
         self._load_vectorstore()
         
-        # OpenAI client
+        # OpenAI client'ı hazırlıyorum - API key varsa
         api_key = os.getenv("OPENAI_API_KEY")
         if api_key:
             self.openai_client = OpenAI(api_key=api_key)
@@ -85,7 +86,7 @@ class RAGEngine:
             print("[!] OPENAI_API_KEY yok, GPT çalışmaz")
     
     def _load_vectorstore(self) -> bool:
-        # FAISS indexi yükle
+        # FAISS index'ini yüklüyorum - daha önce oluşturulmuş olmalı
         index_file = self.index_path / "index.faiss"
         
         if not index_file.exists():
@@ -93,6 +94,7 @@ class RAGEngine:
             return False
         
         try:
+            # FAISS'i yüklüyorum - embeddings lazım çünkü index'i decode ediyor
             self.vectorstore = FAISS.load_local(
                 str(self.index_path),
                 self.embeddings,
@@ -105,24 +107,26 @@ class RAGEngine:
             return False
     
     def retrieve(self, query: str, top_k: int = 3) -> List[Dict]:
-        # sorguya en benzer chunk'ları getir
+        # Sorguya en benzer chunk'ları getiriyorum - top_k kadar
+        # FAISS similarity search yapıyorum
         if not self.vectorstore:
             return []
         
         results = self.vectorstore.similarity_search_with_score(query, k=top_k)
         
+        # Score'u benzerliğe çeviriyorum (mesafe -> benzerlik)
         return [{
             'context': doc.page_content,
-            'score': float(1 - score),  # mesafe -> benzerlik
+            'score': float(1 - score),  # Mesafe ne kadar azsa o kadar benzer
             'metadata': doc.metadata
         } for doc, score in results]
     
     def _ask_gpt(self, query: str, contexts: List[str]) -> Tuple[str, float]:
-        # OpenAI GPT'ye sor
+        # OpenAI GPT'ye soruyorum - context'leri de veriyorum
         if not self.openai_client:
             return "API key yok", 0.0
         
-        # context'leri birleştir
+        # Context'leri birleştirip prompt'a ekliyorum
         ctx_text = "\n\n".join([f"[{i+1}] {c}" for i, c in enumerate(contexts)])
         
         prompt = f"""Aşağıdaki bilgilere göre soruyu yanıtla.
@@ -152,9 +156,8 @@ CEVAP:"""
             return f"GPT hatası: {e}", 0.0
     
     def _ask_bert_cased(self, query: str, contexts: List[str]) -> Tuple[str, float]:
-        # BERT için basit yaklaşım
-        # context'i cümlelere ayır, sorguyla en çok kelime eşleşeni seç
-        # gerçek QA modeli değil ama idare eder
+        # BERT için basit yaklaşım kullanıyorum - gerçek QA modeli değil ama idare ediyor
+        # Context'i cümlelere ayırıp sorguyla en çok kelime eşleşen cümleyi seçiyorum
         text = " ".join(contexts)
         sentences = [s.strip() for s in text.replace('!', '.').replace('?', '.').split('.') if s.strip()]
         
@@ -163,40 +166,43 @@ CEVAP:"""
         
         query_words = set(query.lower().split())
         
-        # her cümleyi skorla
+        # Her cümleyi skorluyorum - kaç kelime eşleşiyor
         best = ("", 0)
         for sent in sentences:
             sent_words = set(sent.lower().split())
-            overlap = len(query_words & sent_words)
+            overlap = len(query_words & sent_words)  # Ortak kelimeler
             if overlap > best[1]:
                 best = (sent, overlap)
         
         if best[1] > 0:
+            # Güven skorunu hesaplıyorum - ne kadar çok kelime eşleşirse o kadar yüksek
             conf = min(0.9, best[1] / max(len(query_words), 1))
             return best[0] + ".", conf
         
+        # Hiç eşleşme yoksa ilk cümleyi döndürüyorum ama düşük güvenle
         return sentences[0] + ".", 0.3
     
     def _ask_bert_sentiment(self, query: str, contexts: List[str]) -> Tuple[str, float]:
-        # bert-sentiment için de aynı mantık
-        # ileride sentiment modeli eklenebilir
+        # BERT sentiment için de aynı mantığı kullanıyorum
+        # İleride gerçek sentiment modeli eklenebilir ama şimdilik bu yeterli
         return self._ask_bert_cased(query, contexts)
     
     def query(self, text: str, model_type: str = "GPT") -> Dict:
-        # ana sorgu fonksiyonu
+        # Ana sorgu fonksiyonu - kullanıcı sorusunu alıp cevap döndürüyorum
         start = time.time()
         
-        # model normalize
+        # Model tipini normalize ediyorum - frontend'den farklı formatlar gelebilir
         model = model_type.upper().replace("-", "_")
         if model not in ["GPT", "BERT_CASED", "BERT_SENTIMENT"]:
-            model = "GPT"
+            model = "GPT"  # Geçersizse default GPT
         
-        # context çek
+        # FAISS'ten ilgili context'leri çekiyorum - top 3
         retrieved = self.retrieve(text, top_k=3)
         contexts = [r['context'] for r in retrieved]
         scores = [r['score'] for r in retrieved]
         
         if not contexts:
+            # Context yoksa veri yüklenmemiş demektir
             return {
                 "answer": "Önce veri yükleyin",
                 "context": "",

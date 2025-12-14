@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# döküman işleme ve FAISS'e yükleme
-# PDF, Word, JSON, web sayfası vs. alıp vektör DB'ye atıyor
+# Döküman işleme ve FAISS'e yükleme - PDF, Word, JSON, web sayfası vs. alıp vektör DB'ye atıyorum
+# LangChain kullanıyorum çünkü manuel parsing çok uğraştırıyor
 
 import argparse
 import json
@@ -13,7 +13,7 @@ from urllib.parse import urlparse
 from dotenv import load_dotenv
 load_dotenv()
 
-# LangChain yükleyiciler
+# LangChain yükleyicileri - her dosya tipi için ayrı loader var
 from langchain_community.document_loaders import (
     PyPDFLoader,
     WebBaseLoader,
@@ -27,41 +27,44 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.schema import Document
 
-# dizin ayarları
+# Dizin ayarları - FAISS index'leri ve upload edilen dosyalar burada
 BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
 INDEX_DIR = DATA_DIR / "faiss_index"
 UPLOADS_DIR = DATA_DIR / "uploads"
 
-# embedding modelleri - şimdilik sadece HuggingFace destekliyoruz
+# Embedding modelleri - şimdilik sadece HuggingFace destekliyorum
+# OpenAI embedding'i de eklenebilir ama ayrı işlem gerekiyor
 EMBEDDING_MODELS = {
     'paraphrase-multilingual-MiniLM-L12-v2': 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2',
     'text-embedding-3-large': 'text-embedding-3-large'  # OpenAI için ayrı işlem gerekir
 }
 DEFAULT_EMBEDDING = 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
 
-# chunk boyutları - deneme yanılmayla bulundu
+# Chunk boyutları - deneme yanılmayla buldum
 # 750 karakter hem context window'a sığıyor hem anlam bütünlüğü korunuyor
+# 100 overlap ile chunk'lar arası bağlantı sağlanıyor
 CHUNK_SIZE = 750
 CHUNK_OVERLAP = 100
 
 
 class DocumentIngestor:
-    # dökümanları alıp FAISS'e yükleyen sınıf
-    # LangChain kullanıyor, manuel parsing yok
+    # Dökümanları alıp FAISS'e yükleyen sınıf
+    # LangChain kullanıyorum çünkü manuel parsing çok uğraştırıyor
     
     def __init__(self, index_name: str = "default", embedding_model: str = None):
         self.index_name = index_name
         self.index_path = INDEX_DIR / index_name
         self.embedding_model_name = embedding_model or DEFAULT_EMBEDDING
         
-        # dizinleri oluştur
+        # Dizinleri oluşturuyorum - yoksa hata verir
         self.index_path.mkdir(parents=True, exist_ok=True)
         UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
         
-        self._embeddings = None  # lazy load
+        self._embeddings = None  # Lazy load yapıyorum - gerektiğinde yükleniyor
         
-        # splitter - paragraf ve cümle sınırlarına dikkat ediyor
+        # Text splitter - paragraf ve cümle sınırlarına dikkat ediyor
+        # Önce paragraf, sonra cümle, sonra kelime bazında bölüyor
         self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=CHUNK_SIZE,
             chunk_overlap=CHUNK_OVERLAP,
@@ -73,7 +76,8 @@ class DocumentIngestor:
     
     @property
     def embeddings(self) -> HuggingFaceEmbeddings:
-        # embedding modeli - ilk kullanımda yükleniyor
+        # Embedding modelini lazy load yapıyorum - ilk kullanımda yükleniyor
+        # Başlangıçta yüklemek gereksiz yavaşlatıyor
         if self._embeddings is None:
             print(f"[*] Embedding modeli yükleniyor: {self.embedding_model_name}")
             model_name = EMBEDDING_MODELS.get(self.embedding_model_name, self.embedding_model_name)
@@ -85,14 +89,15 @@ class DocumentIngestor:
         return self._embeddings
     
     def detect_source_type(self, source: str) -> str:
-        # dosya tipini uzantıdan veya URL'den anlıyor
+        # Dosya tipini uzantıdan veya URL'den anlıyorum
+        # URL ise web scraping yapacağım, dosya ise uzantıya bakacağım
         
-        # URL mi?
+        # URL mi kontrol ediyorum
         parsed = urlparse(source)
         if parsed.scheme in ('http', 'https'):
             return 'web'
         
-        # uzantıya bak
+        # Uzantıya bakıyorum
         ext = Path(source).suffix.lower()
         type_map = {
             '.pdf': 'pdf',
@@ -106,8 +111,8 @@ class DocumentIngestor:
         return type_map.get(ext, 'txt')
     
     def load_document(self, source: str) -> List[Document]:
-        # kaynağı LangChain loader ile yüklüyor
-        # tip otomatik algılanıyor
+        # Kaynağı LangChain loader ile yüklüyorum
+        # Tip otomatik algılanıyor, her tip için uygun loader kullanılıyor
         source_type = self.detect_source_type(source)
         print(f"[*] Yükleniyor: {source_type}")
         
@@ -128,8 +133,8 @@ class DocumentIngestor:
                 docs = self._load_json(source)
                 
             elif source_type == 'csv':
-                # CSV dosyasını UTF-8 encoding ile yükle
-                # Büyük CSV dosyaları için optimize edilmiş yükleme
+                # CSV dosyasını UTF-8 encoding ile yüklüyorum
+                # Büyük CSV dosyaları için biraz zaman alabilir
                 print("[*] CSV dosyası yükleniyor (bu biraz zaman alabilir)...")
                 loader = CSVLoader(
                     file_path=source,

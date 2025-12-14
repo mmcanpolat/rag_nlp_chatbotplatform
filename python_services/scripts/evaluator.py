@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# model değerlendirme scripti
-# her modeli test verisinde çalıştırıp metrikleri hesaplıyor
+# Model değerlendirme scripti - her modeli test verisinde çalıştırıp metrikleri hesaplıyorum
+# Cosine similarity, ROUGE-L, BLEU, F1, Accuracy hesaplıyorum ve grafik çiziyorum
 
 import json
 import os
@@ -23,31 +23,33 @@ from rouge_score import rouge_scorer
 
 from scripts.rag_engine import RAGEngine
 
-# dizinler
+# Dizinler - grafikleri frontend'e kaydediyorum
 DATA_DIR = Path(__file__).parent.parent / "data"
-PLOTS_DIR = Path(__file__).parent.parent.parent / "frontend" / "src" / "assets" / "plots"
+# Streamlit frontend için plots klasörü
+PLOTS_DIR = Path(__file__).parent.parent.parent / "frontend_streamlit" / "assets" / "plots"
+PLOTS_DIR.mkdir(parents=True, exist_ok=True)
 
-# default embedding - index'ten alınabilir
+# Default embedding - index'ten alınabilir ama şimdilik bu
 DEFAULT_EMBEDDING = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-THRESHOLD = 0.65  # bu değerin üstü "doğru" sayılıyor
+THRESHOLD = 0.65  # Bu değerin üstü "doğru" sayılıyor - cosine similarity için
 
 
 class ModelEvaluator:
-    # modelleri test edip karşılaştırma raporu çıkarıyor
-    # grafikleri frontend/assets/plots'a kaydediyor
+    # Modelleri test edip karşılaştırma raporu çıkarıyorum
+    # Grafikleri plots klasörüne kaydediyorum
     
     def __init__(self, index_name: str = "default"):
         self.index_name = index_name
-        self.rag = None
-        self.embed_model = None
+        self.rag = None  # Lazy load
+        self.embed_model = None  # Lazy load
         self.scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
         self.results = {}
     
     def _load(self):
-        # modelleri yükle (lazy)
+        # Modelleri lazy load yapıyorum - gerektiğinde yükleniyor
         if self.embed_model is None:
             print("[*] Embedding modeli yükleniyor...")
-            # index metadata'sından model adını alabiliriz ama şimdilik default
+            # Index metadata'sından model adını alabilirim ama şimdilik default kullanıyorum
             self.embed_model = SentenceTransformer(DEFAULT_EMBEDDING)
         
         if self.rag is None:
@@ -55,38 +57,42 @@ class ModelEvaluator:
             self.rag = RAGEngine(self.index_name)
     
     def cosine_sim(self, text1: str, text2: str) -> float:
-        # iki metin arası cosine similarity
+        # İki metin arası cosine similarity hesaplıyorum
+        # Embedding'leri alıp cosine hesaplıyorum
         vecs = self.embed_model.encode([text1, text2])
         return float(np.dot(vecs[0], vecs[1]) / (np.linalg.norm(vecs[0]) * np.linalg.norm(vecs[1])))
     
     def rouge_score(self, pred: str, ref: str) -> float:
-        # ROUGE-L F1 skoru
+        # ROUGE-L F1 skoru hesaplıyorum - metin benzerliği için
         scores = self.scorer.score(ref, pred)
         return scores['rougeL'].fmeasure
     
     def f1_score(self, pred: str, ref: str) -> float:
-        # basit token-based F1
+        # Basit token-based F1 hesaplıyorum - kelime bazında karşılaştırma
         pred_tokens = set(pred.lower().split())
         ref_tokens = set(ref.lower().split())
         
-        common = pred_tokens & ref_tokens
+        common = pred_tokens & ref_tokens  # Ortak kelimeler
         if not common:
             return 0.0
         
+        # Precision ve recall hesaplıyorum
         prec = len(common) / len(pred_tokens) if pred_tokens else 0
         rec = len(common) / len(ref_tokens) if ref_tokens else 0
         
+        # F1 = 2 * (precision * recall) / (precision + recall)
         return 2 * prec * rec / (prec + rec) if (prec + rec) > 0 else 0.0
     
     def evaluate_one(self, question: str, expected: str, model: str) -> Dict:
-        # tek bir soru için metrikleri hesapla
+        # Tek bir soru için tüm metrikleri hesaplıyorum
         res = self.rag.query(question, model)
         pred = res['answer']
         
+        # Tüm metrikleri hesaplıyorum
         cos = self.cosine_sim(pred, expected)
         rouge = self.rouge_score(pred, expected)
         f1 = self.f1_score(pred, expected)
-        correct = 1 if cos > THRESHOLD else 0
+        correct = 1 if cos > THRESHOLD else 0  # Threshold üstüyse doğru sayıyorum
         
         return {
             'question': question,

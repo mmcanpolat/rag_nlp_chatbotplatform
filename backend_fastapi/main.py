@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
-"""
-FastAPI Backend - RAG SaaS Platform
-Express.js backend'inin Python'a çevrilmiş hali
-"""
+# Backend API - FastAPI ile yazdım, Express.js yerine Python kullanıyorum
+# Tüm endpoint'ler burada, RAG servislerini çağırıyor
 
 import os
 import sys
@@ -19,20 +17,22 @@ from fastapi.responses import JSONResponse, FileResponse
 from pydantic import BaseModel
 import uvicorn
 
-# Python servislerini import et
+# Python servislerini import ediyorum - RAG engine, ingestor, evaluator
+# sys.path'e ekliyorum çünkü scripts klasöründen import ediyorum
 python_services_path = Path(__file__).parent.parent / "python_services" / "scripts"
 sys.path.insert(0, str(python_services_path))
 
 from dotenv import load_dotenv
 load_dotenv()
 
-# Python servislerini import et
+# Import'ları deniyorum, hata olursa alternatif yolla yüklüyorum
+# Bazen path sorunları oluyor, o yüzden iki yöntem var
 try:
     from rag_engine import RAGEngine
     from ingestor import DocumentIngestor
     from evaluator import Evaluator
 except ImportError as e:
-    # Alternatif import yolu
+    # Normal import çalışmazsa manuel yüklüyorum
     import importlib.util
     python_services_path = Path(__file__).parent.parent / "python_services" / "scripts"
     
@@ -55,19 +55,20 @@ except ImportError as e:
 
 BASE_DIR = Path(__file__).parent.parent
 UPLOAD_DIR = BASE_DIR / "python_services" / "data" / "uploads"
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)  # uploads klasörü yoksa oluştur
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-REQUEST_TIMEOUT = int(os.getenv("REQUEST_TIMEOUT", "600000"))  # 10 dakika
+REQUEST_TIMEOUT = int(os.getenv("REQUEST_TIMEOUT", "600000"))  # 10 dakika - büyük dosyalar için
 
 # ==================== FASTAPI APP ====================
 
 app = FastAPI(title="RAG SaaS Platform API")
 
-# CORS
+# CORS ayarları - Streamlit'ten istekler geliyor, o yüzden tüm origin'lere izin veriyorum
+# Production'da sadece belirli domain'lere izin vermek daha iyi olur
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Streamlit için
+    allow_origins=["*"],  # Streamlit için şimdilik hepsine açık
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -75,11 +76,13 @@ app.add_middleware(
 
 # ==================== IN-MEMORY DATA ====================
 
+# Veritabanı kullanmıyorum, şimdilik memory'de tutuyorum
+# Production'da SQLite veya PostgreSQL kullanılabilir
 companies: Dict[str, dict] = {}
 agents: Dict[str, dict] = {}
-sessions: Dict[str, dict] = {}
+sessions: Dict[str, dict] = {}  # session token -> user bilgisi
 
-# SuperAdmin default
+# SuperAdmin default - ilk açılışta bu bilgilerle giriş yapılabiliyor
 SUPER_ADMIN = {
     "id": "superadmin",
     "username": "admin@ragplatform.com",
@@ -92,29 +95,33 @@ SUPER_ADMIN = {
 # ==================== HELPER FUNCTIONS ====================
 
 def gen_id() -> str:
-    """Benzersiz ID üret"""
+    # Benzersiz ID üretiyorum - timestamp + random hex
+    # Collision riski çok düşük, yeterli
     return f"{int(time.time() * 1000)}_{secrets.token_hex(4)}"
 
 def generate_strong_password() -> str:
-    """24 karakter güçlü şifre üret"""
+    # 24 karakter güçlü şifre - şirket oluşturulunca otomatik üretiliyor
+    # secrets modülü kriptografik olarak güvenli random üretiyor
     chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*'
     return ''.join(secrets.choice(chars) for _ in range(24))
 
 def get_user(authorization: Optional[str] = Header(None)) -> Optional[dict]:
-    """Session'dan user al"""
+    # Header'dan token alıp session'dan user bilgisini döndürüyorum
+    # Bearer token formatında geliyor genelde
     if not authorization:
         return None
     token = authorization.replace("Bearer ", "") if authorization.startswith("Bearer ") else authorization
     return sessions.get(token)
 
 def require_auth(user: Optional[dict] = Depends(get_user)) -> dict:
-    """Auth gerektiren endpoint'ler için"""
+    # Bu decorator ile endpoint'ler auth gerektiriyor
+    # User yoksa 401 döndürüyor
     if not user:
         raise HTTPException(status_code=401, detail="Giriş yapmanız gerekiyor")
     return user
 
 def require_superadmin(user: dict = Depends(require_auth)) -> dict:
-    """SuperAdmin gerektiren endpoint'ler için"""
+    # SuperAdmin kontrolü - sadece admin işlemleri için
     if not user.get("isSuperAdmin"):
         raise HTTPException(status_code=403, detail="Yetki yok")
     return user
@@ -153,8 +160,10 @@ class ChatRequest(BaseModel):
 
 @app.post("/api/auth/login")
 async def login(request: LoginRequest):
-    """Kullanıcı girişi"""
-    # SuperAdmin kontrol
+    # Giriş endpoint'i - önce SuperAdmin kontrol ediyorum, sonra şirket kontrolü
+    # Başarılı olursa session token döndürüyorum
+    
+    # SuperAdmin kontrolü - default kullanıcı
     if request.username == SUPER_ADMIN["username"] and request.password == SUPER_ADMIN["password"]:
         token = gen_id()
         sessions[token] = {"isSuperAdmin": True, "username": request.username}
@@ -168,7 +177,7 @@ async def login(request: LoginRequest):
             }
         }
     
-    # Şirket kontrol
+    # Şirket kontrolü - memory'deki companies dict'inde arıyorum
     company = next((c for c in companies.values() if c["username"] == request.username), None)
     if company and company["password"] == request.password:
         token = gen_id()
@@ -189,6 +198,7 @@ async def login(request: LoginRequest):
             }
         }
     
+    # Hiçbiri eşleşmezse hata döndürüyorum
     raise HTTPException(status_code=401, detail="Kullanıcı adı veya şifre hatalı")
 
 @app.post("/api/auth/logout")
@@ -277,14 +287,16 @@ async def delete_company(company_id: str, user: dict = Depends(require_superadmi
 
 @app.post("/api/agents")
 async def create_agent(agent_data: AgentCreate, user: dict = Depends(require_auth)):
-    """Agent oluştur"""
+    # Agent oluşturma - chatbot için gerekli bilgileri alıp FAISS index'i hazırlıyorum
+    # Eğer dosya veya URL verilmişse ingestion yapıyorum
+    
     agent_id = gen_id()
-    index_name = f"agent_{agent_id}"
+    index_name = f"agent_{agent_id}"  # Her agent'ın kendi FAISS index'i var
     
     agent = {
         "id": agent_id,
         "name": agent_data.name,
-        "companyId": user.get("companyId"),
+        "companyId": user.get("companyId"),  # Hangi şirkete ait
         "embeddingModel": agent_data.embedding_model,
         "dataSourceType": agent_data.data_source_type,
         "dataSource": agent_data.data_source,
@@ -292,7 +304,7 @@ async def create_agent(agent_data: AgentCreate, user: dict = Depends(require_aut
         "createdAt": datetime.now().isoformat()
     }
     
-    # Eğer veri kaynağı varsa, ingestion yap
+    # Veri kaynağı varsa ingestion yapıyorum - bu biraz zaman alabilir
     if agent_data.data_source:
         try:
             ingestor = DocumentIngestor(
@@ -301,18 +313,19 @@ async def create_agent(agent_data: AgentCreate, user: dict = Depends(require_aut
             )
             
             if agent_data.data_source_type == "file":
-                # Dosya yolu
+                # Dosya yolu - upload edilmiş dosyanın path'i geliyor
                 file_path = Path(agent_data.data_source)
                 if not file_path.exists():
                     raise FileNotFoundError(f"Dosya bulunamadı: {agent_data.data_source}")
                 ingestor.ingest(str(file_path))
             elif agent_data.data_source_type == "url":
-                # URL
+                # URL'den web scraping yapıyorum
                 ingestor.ingest(agent_data.data_source)
             else:
                 raise ValueError("Geçersiz veri kaynağı tipi")
             
         except Exception as e:
+            # Ingestion hatası olursa agent oluşturmuyorum, hata döndürüyorum
             return {"success": False, "error": f"Ingestion hatası: {str(e)}"}
     
     agents[agent_id] = agent
@@ -349,7 +362,9 @@ async def delete_agent(agent_id: str, user: dict = Depends(require_auth)):
 
 @app.post("/api/chat")
 async def chat(request: ChatRequest, user: dict = Depends(require_auth)):
-    """Chat endpoint - RAG sorgusu"""
+    # Chat endpoint'i - kullanıcı sorusunu alıp RAG engine'e gönderiyorum
+    # RAG engine FAISS'ten ilgili context'i bulup modele veriyor
+    
     agent_id = request.agent_id
     
     if agent_id not in agents:
@@ -357,26 +372,29 @@ async def chat(request: ChatRequest, user: dict = Depends(require_auth)):
     
     agent = agents[agent_id]
     
-    # Yetki kontrolü
+    # Yetki kontrolü - sadece agent'ın sahibi veya SuperAdmin kullanabilir
     if not user.get("isSuperAdmin") and agent.get("companyId") != user.get("companyId"):
         raise HTTPException(status_code=403, detail="Yetki yok")
     
     index_name = agent.get("indexName", f"agent_{agent_id}")
     
     try:
+        # RAG engine'i başlatıyorum - index'i yüklüyor
         rag = RAGEngine(index_name=index_name)
+        # Sorguyu çalıştırıyorum - model seçimi frontend'den geliyor (gpt, bert-turkish, bert-sentiment)
         result = rag.query(request.query, model=request.model)
         
         return {
             "success": True,
             "data": {
                 "answer": result["answer"],
-                "context": result["context"],
-                "confidence": result["confidence"],
+                "context": result["context"],  # Hangi döküman parçasından geldi
+                "confidence": result["confidence"],  # Güven skoru
                 "model_used": result["model_used"]
             }
         }
     except Exception as e:
+        # Hata olursa detaylı mesaj döndürüyorum
         raise HTTPException(status_code=500, detail=f"Chat hatası: {str(e)}")
 
 # ==================== UPLOAD ENDPOINT ====================

@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
-"""
-Streamlit Frontend - RAG SaaS Platform
-Angular frontend'inin Python'a çevrilmiş hali
-"""
+# Streamlit Frontend - RAG SaaS Platform
+# Angular yerine Streamlit kullanıyorum, daha basit ve Python-only
 
 import streamlit as st
 import requests
@@ -12,11 +10,14 @@ import os
 
 # ==================== CONFIG ====================
 
+# API base URL - backend FastAPI'ye bağlanıyorum
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000")
 API_URL = f"{API_BASE_URL}/api"
 
 # ==================== SESSION STATE ====================
 
+# Streamlit session state - sayfa yenilense bile veriler kalıyor
+# Kullanıcı bilgisi, token, agent'lar vs. burada tutuluyor
 if "user" not in st.session_state:
     st.session_state.user = None
 if "session_token" not in st.session_state:
@@ -26,19 +27,21 @@ if "agents" not in st.session_state:
 if "active_agent" not in st.session_state:
     st.session_state.active_agent = None
 if "chat_history" not in st.session_state:
-    st.session_state.chat_history = {}
+    st.session_state.chat_history = {}  # Her agent için ayrı chat history
 
 # ==================== HELPER FUNCTIONS ====================
 
 def get_headers() -> Dict[str, str]:
-    """API istekleri için header'lar"""
+    # API istekleri için header'lar hazırlıyorum
+    # Token varsa Authorization header'ına ekliyorum
     headers = {"Content-Type": "application/json"}
     if st.session_state.session_token:
         headers["Authorization"] = f"Bearer {st.session_state.session_token}"
     return headers
 
 def api_request(method: str, endpoint: str, data: Optional[dict] = None) -> dict:
-    """API isteği yap"""
+    # API isteği yapıyorum - GET, POST, DELETE destekliyorum
+    # Hata olursa try-except ile yakalıyorum
     url = f"{API_URL}{endpoint}"
     headers = get_headers()
     
@@ -54,6 +57,7 @@ def api_request(method: str, endpoint: str, data: Optional[dict] = None) -> dict
         
         return response.json()
     except Exception as e:
+        # Hata olursa detaylı mesaj döndürüyorum
         return {"success": False, "error": str(e)}
 
 # ==================== LOGIN PAGE ====================
