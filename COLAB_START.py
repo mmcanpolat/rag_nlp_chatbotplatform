@@ -75,72 +75,29 @@ backend = subprocess.Popen(
 )
 time.sleep(5)
 
-# Frontend başlat (Gradio) - log dosyasına yazıp URL'yi oku
-gradio_log_file = "/tmp/gradio_output.log"
-gradio_url = None
-
-# Frontend'i başlat - stdout'u log dosyasına yaz
+# Frontend başlat (Gradio) - Colab'te share=True ile
+print("⏳ Gradio başlatılıyor...")
 frontend = subprocess.Popen(
     [sys.executable, "app.py"],
     cwd="frontend_gradio",
-    stdout=open(gradio_log_file, "w"),
-    stderr=subprocess.STDOUT,
-    env={**os.environ, "API_BASE_URL": "http://localhost:3000"}
+    stdout=subprocess.DEVNULL,
+    stderr=subprocess.DEVNULL,
+    env={**os.environ, "API_BASE_URL": "http://localhost:3000", "GRADIO_SHARE": "true"}
 )
-
-# Gradio'nun başlamasını bekle
-print("⏳ Gradio başlatılıyor (public URL oluşturuluyor, 20 saniye bekleniyor)...")
-time.sleep(20)
-
-# Log dosyasından URL'yi oku
-try:
-    if os.path.exists(gradio_log_file):
-        with open(gradio_log_file, "r") as f:
-            log_content = f.read()
-            # URL'yi bul
-            for line in log_content.split("\n"):
-                if "Running on public URL:" in line:
-                    gradio_url = line.split("Running on public URL:")[-1].strip()
-                    break
-                elif "https://" in line and "gradio.live" in line:
-                    # Direkt URL satırı
-                    parts = line.split()
-                    for part in parts:
-                        if "https://" in part and "gradio.live" in part:
-                            gradio_url = part.strip()
-                            break
-                    if gradio_url:
-                        break
-except Exception as e:
-    print(f"[!] Log okuma hatası: {e}")
+time.sleep(10)
 
 print("✅ Servisler başlatıldı!")
 print("\n" + "=" * 60)
 print("📍 Backend: http://localhost:3000")
 print("📍 Frontend: http://localhost:7860")
-
-# Colab port forwarding - alternatif yöntem
-try:
-    from google.colab import output
-    # Colab'in port forwarding'ini kullan
-    print("\n🔗 Colab Port Forwarding:")
-    print("   Sağ üstteki 🔗 ikonuna tıklayıp port 7860'i seç")
-    print("   Veya aşağıdaki komutu çalıştır:")
-    print("   !pip install pyngrok && python -m pyngrok http 7860")
-except:
-    pass
-
-if gradio_url:
-    print(f"\n🌐 Gradio Public URL: {gradio_url}")
-    print(f"   👆 Bu URL'yi kopyalayıp tarayıcıda aç!")
-else:
-    print("\n🔗 Public URL oluşturuluyor...")
-    print("   ⚠️  Birkaç saniye sonra log dosyasını kontrol et:")
-    print(f"   📄 Log: {gradio_log_file}")
-    print("   Veya Colab'te sağ üstteki 🔗 ikonuna tıklayıp port 7860'i seç")
-    print("\n   💡 Alternatif: Aşağıdaki komutu çalıştır:")
-    print("   !cat /tmp/gradio_output.log | grep 'public URL'")
-
+print("\n🔗 Public URL için 2 yöntem:")
+print("\n   1️⃣  Colab Port Forwarding (ÖNERİLEN):")
+print("      → Sağ üstteki 🔗 ikonuna tıkla")
+print("      → Port: 7860 seç")
+print("      → Açılan URL'yi kullan")
+print("\n   2️⃣  Gradio Share URL (otomatik):")
+print("      → Birkaç saniye bekle, Gradio public URL oluşturacak")
+print("      → Terminal çıktısında 'Running on public URL:' yazısını ara")
 print("\n🔑 Giriş: admin@ragplatform.com / Admin123!@#")
 print("=" * 60)
 
