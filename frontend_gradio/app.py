@@ -506,8 +506,13 @@ def build_ui():
 if __name__ == "__main__":
     app = build_ui()
     # Colab'te share=True otomatik public URL oluşturur
-    # Colab ortamını kontrol ediyorum
-    is_colab = os.getenv("COLAB_RELEASE_TAG") is not None or "google.colab" in str(sys.modules.keys())
+    # Colab ortamını kontrol ediyorum - Colab'te her zaman True
+    try:
+        import google.colab
+        is_colab = True
+    except:
+        is_colab = os.getenv("COLAB_RELEASE_TAG") is not None
+    
     app.launch(
         server_name="0.0.0.0",
         server_port=7860,
