@@ -75,39 +75,28 @@ backend = subprocess.Popen(
 )
 time.sleep(5)
 
-# Frontend başlat (Gradio) - basit ve hızlı
+# Frontend başlat (Gradio) - en basit yöntem
 print("⏳ Gradio başlatılıyor...")
 
-# Gradio'yu arka planda başlat
+# Gradio'yu arka planda başlat - log dosyasına yaz
+gradio_log = "/tmp/gradio.log"
 frontend = subprocess.Popen(
     [sys.executable, "app.py"],
     cwd="frontend_gradio",
-    stdout=subprocess.PIPE,
+    stdout=open(gradio_log, "w"),
     stderr=subprocess.STDOUT,
-    text=True,
     env={**os.environ, "API_BASE_URL": "http://localhost:3000", "GRADIO_SHARE": "true"}
 )
 
-# URL'yi yakalamak için kısa bir süre bekle ve stdout'u oku
-gradio_url = None
-print("📡 Gradio public URL bekleniyor...\n")
+# Gradio başlaması için kısa bekleme
+time.sleep(8)
 
-# 10 saniye boyunca stdout'u oku (Gradio hızlı başlar)
-for i in range(20):  # 20 x 0.5 = 10 saniye
-    time.sleep(0.5)
-    try:
-        # Basit readline - blocking olabilir ama kısa süre
-        import select
-        ready, _, _ = select.select([frontend.stdout], [], [], 0.1)
-        if ready:
-            line = frontend.stdout.readline()
-            if line:
-                line = line.strip()
-                # Sadece önemli satırları göster
-                if "Running on" in line or "public URL" in line or "https://" in line:
-                    print(line)
-                
-                # URL'yi bul
+# Log dosyasından URL'yi oku
+gradio_url = None
+try:
+    if os.path.exists(gradio_log):
+        with open(gradio_log, "r") as f:
+            for line in f:
                 if "Running on public URL:" in line:
                     gradio_url = line.split("Running on public URL:")[-1].strip()
                     break
@@ -118,12 +107,8 @@ for i in range(20):  # 20 x 0.5 = 10 saniye
                             break
                     if gradio_url:
                         break
-    except:
-        continue
-    
-    # URL bulunduysa çık
-    if gradio_url:
-        break
+except:
+    pass
 
 print("\n" + "=" * 60)
 print("✅ Servisler başlatıldı!")
