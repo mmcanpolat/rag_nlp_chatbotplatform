@@ -75,53 +75,55 @@ backend = subprocess.Popen(
 )
 time.sleep(5)
 
-# Frontend başlat (Gradio) - stdout'u yakalayıp URL'yi göster
-print("⏳ Gradio başlatılıyor (public URL oluşturuluyor)...")
+# Frontend başlat (Gradio) - basit ve hızlı
+print("⏳ Gradio başlatılıyor...")
 
-# Gradio stdout'unu yakalamak için pipe kullan
+# Gradio'yu arka planda başlat
 frontend = subprocess.Popen(
     [sys.executable, "app.py"],
     cwd="frontend_gradio",
     stdout=subprocess.PIPE,
     stderr=subprocess.STDOUT,
     text=True,
-    bufsize=1,
     env={**os.environ, "API_BASE_URL": "http://localhost:3000", "GRADIO_SHARE": "true"}
 )
 
-# URL'yi yakalamak için stdout'u oku
+# URL'yi yakalamak için kısa bir süre bekle ve stdout'u oku
 gradio_url = None
-print("\n📡 Gradio çıktısı dinleniyor (public URL aranıyor)...\n")
+print("📡 Gradio public URL bekleniyor...\n")
 
-# 25 saniye boyunca stdout'u oku
-for i in range(50):  # 50 x 0.5 = 25 saniye
+# 10 saniye boyunca stdout'u oku (Gradio hızlı başlar)
+for i in range(20):  # 20 x 0.5 = 10 saniye
     time.sleep(0.5)
     try:
-        # Non-blocking read
+        # Basit readline - blocking olabilir ama kısa süre
         import select
-        if select.select([frontend.stdout], [], [], 0)[0]:
+        ready, _, _ = select.select([frontend.stdout], [], [], 0.1)
+        if ready:
             line = frontend.stdout.readline()
             if line:
                 line = line.strip()
-                print(line)  # Gradio çıktısını göster
+                # Sadece önemli satırları göster
+                if "Running on" in line or "public URL" in line or "https://" in line:
+                    print(line)
                 
                 # URL'yi bul
                 if "Running on public URL:" in line:
                     gradio_url = line.split("Running on public URL:")[-1].strip()
-                    print(f"\n✅ GRADIO PUBLIC URL BULUNDU: {gradio_url}\n")
                     break
                 elif "https://" in line and ("gradio.live" in line or "gradio.app" in line):
-                    # Direkt URL satırı
                     for word in line.split():
                         if "https://" in word and ("gradio.live" in word or "gradio.app" in word):
                             gradio_url = word.strip().rstrip(".,;")
-                            print(f"\n✅ GRADIO PUBLIC URL BULUNDU: {gradio_url}\n")
                             break
                     if gradio_url:
                         break
     except:
-        # select modülü yoksa veya hata varsa devam et
         continue
+    
+    # URL bulunduysa çık
+    if gradio_url:
+        break
 
 print("\n" + "=" * 60)
 print("✅ Servisler başlatıldı!")
