@@ -286,24 +286,8 @@ def get_companies_list():
 # ==================== GRADIO UI ====================
 
 def build_ui():
-    # Custom CSS - Snow White Theme
-    custom_css = """
-    .gradio-container {
-        background: #fafafa !important;
-    }
-    .main-panel {
-        background: #fefefe !important;
-    }
-    """
-    
-    with gr.Blocks(
-        theme=gr.themes.Soft(
-            primary_hue="slate",
-            neutral_hue="slate",
-            font=("Inter", "ui-sans-serif", "system-ui", "sans-serif")
-        ),
-        css=custom_css
-    ) as app:
+    # Gradio 5.0+ için theme ve css'yi launch'a taşıyoruz
+    with gr.Blocks() as app:
         # Login Screen
         with gr.Column(visible=True) as login_screen:
             gr.Markdown("### Giriş Yap")
@@ -521,10 +505,26 @@ if __name__ == "__main__":
     else:
         share_value = False
     
+    # Custom CSS - Snow White Theme
+    custom_css = """
+    .gradio-container {
+        background: #fafafa !important;
+    }
+    .main-panel {
+        background: #fefefe !important;
+    }
+    """
+    
     print(f"[*] Gradio başlatılıyor... (share={share_value})")
     app.launch(
         server_name="0.0.0.0",
         server_port=7860,
         share=share_value,
-        show_error=True  # Hataları göster
+        show_error=True,  # Hataları göster
+        theme=gr.themes.Soft(
+            primary_hue="slate",
+            neutral_hue="slate",
+            font=("Inter", "ui-sans-serif", "system-ui", "sans-serif")
+        ),
+        css=custom_css
     )
