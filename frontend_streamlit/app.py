@@ -327,34 +327,8 @@ CUSTOM_CSS = """
     footer {visibility: hidden;}
     header {visibility: hidden;}
     
-    /* Icon Styles */
-    .icon {
-        display: inline-block;
-        width: 18px;
-        height: 18px;
-        margin-right: 8px;
-        vertical-align: middle;
-        opacity: 0.7;
-    }
-    
-    /* Menu Icons */
-    .menu-icon {
-        font-size: 16px;
-        margin-right: 8px;
-        color: #4a5568;
-    }
 </style>
 """
-
-# Icon mapping - text-based icons
-ICONS = {
-    "chat": "💬",
-    "analytics": "📊",
-    "agents": "🤖",
-    "companies": "👥",
-    "upload": "📤",
-    "logout": "🚪"
-}
 
 # ==================== CONFIG ====================
 
