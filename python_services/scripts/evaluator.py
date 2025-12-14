@@ -25,9 +25,15 @@ from scripts.rag_engine import RAGEngine
 
 # Dizinler - grafikleri frontend'e kaydediyorum
 DATA_DIR = Path(__file__).parent.parent / "data"
-# Streamlit frontend için plots klasörü
-PLOTS_DIR = Path(__file__).parent.parent.parent / "frontend_streamlit" / "assets" / "plots"
+# Gradio frontend için plots klasörü (fallback: streamlit, python_services)
+PLOTS_DIR_GRADIO = Path(__file__).parent.parent.parent / "frontend_gradio" / "assets" / "plots"
+PLOTS_DIR_STREAMLIT = Path(__file__).parent.parent.parent / "frontend_streamlit" / "assets" / "plots"
+PLOTS_DIR_DATA = DATA_DIR / "plots"
+# Önce Gradio'ya kaydet, yoksa diğerlerine
+PLOTS_DIR = PLOTS_DIR_GRADIO
 PLOTS_DIR.mkdir(parents=True, exist_ok=True)
+PLOTS_DIR_STREAMLIT.mkdir(parents=True, exist_ok=True)
+PLOTS_DIR_DATA.mkdir(parents=True, exist_ok=True)
 
 # Default embedding - index'ten alınabilir ama şimdilik bu
 DEFAULT_EMBEDDING = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
@@ -197,7 +203,9 @@ class Evaluator:
             axes[i].set_ylabel('Gerçek')
         
         plt.tight_layout()
-        plt.savefig(PLOTS_DIR / 'confusion_matrix.png', dpi=150, bbox_inches='tight', facecolor='white')
+        # Tüm plot dizinlerine kaydet
+        for plot_dir in [PLOTS_DIR, PLOTS_DIR_STREAMLIT, PLOTS_DIR_DATA]:
+            plt.savefig(plot_dir / 'confusion_matrix.png', dpi=150, bbox_inches='tight', facecolor='white')
         plt.close()
     
     def _plot_metrics(self, colors):
@@ -232,7 +240,9 @@ class Evaluator:
         ax.set_ylim(0, 1.15)
         
         plt.tight_layout()
-        plt.savefig(PLOTS_DIR / 'metrics_comparison_bar.png', dpi=150, bbox_inches='tight', facecolor='white')
+        # Tüm plot dizinlerine kaydet
+        for plot_dir in [PLOTS_DIR, PLOTS_DIR_STREAMLIT, PLOTS_DIR_DATA]:
+            plt.savefig(plot_dir / 'metrics_comparison_bar.png', dpi=150, bbox_inches='tight', facecolor='white')
         plt.close()
     
     def _plot_time(self, colors):
@@ -251,7 +261,9 @@ class Evaluator:
         ax.set_title('Ortalama Yanıt Süresi')
         
         plt.tight_layout()
-        plt.savefig(PLOTS_DIR / 'response_time.png', dpi=150, bbox_inches='tight', facecolor='white')
+        # Tüm plot dizinlerine kaydet
+        for plot_dir in [PLOTS_DIR, PLOTS_DIR_STREAMLIT, PLOTS_DIR_DATA]:
+            plt.savefig(plot_dir / 'response_time.png', dpi=150, bbox_inches='tight', facecolor='white')
         plt.close()
     
     def _plot_radar(self, colors):
@@ -284,7 +296,9 @@ class Evaluator:
         ax.set_title('Genel Karşılaştırma')
         
         plt.tight_layout()
-        plt.savefig(PLOTS_DIR / 'radar_chart.png', dpi=150, bbox_inches='tight', facecolor='white')
+        # Tüm plot dizinlerine kaydet
+        for plot_dir in [PLOTS_DIR, PLOTS_DIR_STREAMLIT, PLOTS_DIR_DATA]:
+            plt.savefig(plot_dir / 'radar_chart.png', dpi=150, bbox_inches='tight', facecolor='white')
         plt.close()
     
     def save_json(self):

@@ -445,10 +445,11 @@ async def run_benchmark(request: dict, user: dict = Depends(require_auth)):
         results = evaluator.evaluate_all()
         
         # Plot isimlerini döndürüyorum - frontend'de gösterilecek
+        # Evaluator 4 plot oluşturuyor: confusion_matrix, metrics_comparison_bar, response_time, radar_chart
         return {
             "success": True,
             "data": results,
-            "plots": ["confusion_matrix.png", "metrics_comparison_bar.png"]
+            "plots": ["confusion_matrix.png", "metrics_comparison_bar.png", "response_time.png", "radar_chart.png"]
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Benchmark hatası: {str(e)}")
