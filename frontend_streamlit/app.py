@@ -12,9 +12,20 @@ import os
 
 CUSTOM_CSS = """
 <style>
-    /* Global Styles */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    /* Global Styles - Kar Beyazı Arka Plan */
     * {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    
+    /* Main Background - Kar Beyazı */
+    .main {
+        background: #fafafa;
+    }
+    
+    .stApp {
+        background: #fafafa;
     }
     
     /* Main Container */
@@ -22,60 +33,62 @@ CUSTOM_CSS = """
         padding-top: 2rem;
         padding-bottom: 2rem;
         max-width: 1400px;
+        background: #fefefe;
+        border-radius: 0.5rem;
     }
     
-    /* Sidebar Styling */
+    /* Sidebar Styling - Kar Beyazı */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-        border-right: 1px solid #e2e8f0;
+        background: linear-gradient(180deg, #fefefe 0%, #fafafa 100%);
+        border-right: 1px solid #e5e7eb;
     }
     
     [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h1 {
         font-size: 1.5rem;
         font-weight: 600;
-        color: #1e293b;
+        color: #2d3748;
         margin-bottom: 2rem;
         padding-bottom: 1rem;
-        border-bottom: 2px solid #e2e8f0;
+        border-bottom: 2px solid #e5e7eb;
     }
     
     /* Sidebar User Info */
     .sidebar-user-info {
-        background: #f8fafc;
+        background: #fafafa;
         padding: 1rem;
         border-radius: 0.5rem;
         margin-bottom: 1.5rem;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #e5e7eb;
     }
     
     .sidebar-user-info p {
         margin: 0.25rem 0;
         font-size: 0.875rem;
-        color: #475569;
+        color: #4a5568;
     }
     
     /* Radio Buttons - Custom Styling */
     [data-testid="stRadio"] label {
         font-size: 0.875rem;
-        color: #475569;
+        color: #4a5568;
         padding: 0.75rem 1rem;
         border-radius: 0.5rem;
         transition: all 0.2s;
     }
     
     [data-testid="stRadio"] label:hover {
-        background: #f1f5f9;
+        background: #f7fafc;
     }
     
     [data-testid="stRadio"] input[type="radio"]:checked + label {
-        background: #f1f5f9;
-        color: #1e293b;
+        background: #f7fafc;
+        color: #2d3748;
         font-weight: 500;
     }
     
     /* Buttons */
     .stButton > button {
-        background: #1e293b;
+        background: #2d3748;
         color: white;
         border: none;
         border-radius: 0.5rem;
@@ -86,7 +99,7 @@ CUSTOM_CSS = """
     }
     
     .stButton > button:hover {
-        background: #334155;
+        background: #1a202c;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         transform: translateY(-1px);
     }
@@ -97,29 +110,29 @@ CUSTOM_CSS = """
     
     /* Secondary Button */
     .btn-secondary {
-        background: #f1f5f9;
-        color: #1e293b;
-        border: 1px solid #e2e8f0;
+        background: #f7fafc;
+        color: #2d3748;
+        border: 1px solid #e5e7eb;
     }
     
     .btn-secondary:hover {
-        background: #e2e8f0;
+        background: #edf2f7;
     }
     
     /* Danger Button */
     .btn-danger {
-        background: #ef4444;
+        background: #e53e3e;
         color: white;
     }
     
     .btn-danger:hover {
-        background: #dc2626;
+        background: #c53030;
     }
     
-    /* Cards */
+    /* Cards - Kar Beyazı */
     .card {
-        background: white;
-        border: 1px solid #e2e8f0;
+        background: #fefefe;
+        border: 1px solid #e5e7eb;
         border-radius: 0.75rem;
         padding: 1.5rem;
         margin-bottom: 1rem;
@@ -129,12 +142,12 @@ CUSTOM_CSS = """
     .card-title {
         font-size: 1.125rem;
         font-weight: 600;
-        color: #1e293b;
+        color: #2d3748;
         margin-bottom: 0.75rem;
     }
     
     .card-content {
-        color: #64748b;
+        color: #4a5568;
         font-size: 0.875rem;
         line-height: 1.6;
     }
@@ -143,12 +156,12 @@ CUSTOM_CSS = """
     [data-testid="stMetricValue"] {
         font-size: 2rem;
         font-weight: 600;
-        color: #1e293b;
+        color: #2d3748;
     }
     
     [data-testid="stMetricLabel"] {
         font-size: 0.875rem;
-        color: #64748b;
+        color: #4a5568;
         font-weight: 500;
     }
     
@@ -156,18 +169,20 @@ CUSTOM_CSS = """
     .stTextInput > div > div > input,
     .stTextArea > div > div > textarea,
     .stSelectbox > div > div > select {
-        border: 1px solid #e2e8f0;
+        border: 1px solid #e5e7eb;
         border-radius: 0.5rem;
         padding: 0.625rem 0.875rem;
         font-size: 0.875rem;
+        background: #fefefe;
+        color: #2d3748;
         transition: all 0.2s;
     }
     
     .stTextInput > div > div > input:focus,
     .stTextArea > div > div > textarea:focus,
     .stSelectbox > div > div > select:focus {
-        border-color: #1e293b;
-        box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.1);
+        border-color: #2d3748;
+        box-shadow: 0 0 0 3px rgba(45, 55, 72, 0.1);
         outline: none;
     }
     
@@ -179,20 +194,21 @@ CUSTOM_CSS = """
     }
     
     [data-testid="stChatMessageUser"] {
-        background: #f1f5f9;
-        border-left: 3px solid #1e293b;
+        background: #f7fafc;
+        border-left: 3px solid #2d3748;
     }
     
     [data-testid="stChatMessageAssistant"] {
-        background: white;
-        border: 1px solid #e2e8f0;
+        background: #fefefe;
+        border: 1px solid #e5e7eb;
     }
     
     /* Expander */
     [data-testid="stExpander"] {
-        border: 1px solid #e2e8f0;
+        border: 1px solid #e5e7eb;
         border-radius: 0.5rem;
         margin-top: 0.5rem;
+        background: #fefefe;
     }
     
     /* Success/Error Messages */
@@ -224,77 +240,121 @@ CUSTOM_CSS = """
         color: #1e40af;
     }
     
-    /* Titles */
+    /* Titles - Koyu Gri */
     h1 {
         font-size: 2rem;
         font-weight: 600;
-        color: #1e293b;
+        color: #2d3748;
         margin-bottom: 1.5rem;
     }
     
     h2 {
         font-size: 1.5rem;
         font-weight: 600;
-        color: #1e293b;
+        color: #2d3748;
         margin-bottom: 1rem;
     }
     
     h3 {
         font-size: 1.25rem;
         font-weight: 600;
-        color: #1e293b;
+        color: #2d3748;
         margin-bottom: 0.75rem;
+    }
+    
+    /* Text Colors - Koyu Gri */
+    p, span, div, label {
+        color: #4a5568;
     }
     
     /* Dividers */
     hr {
         border: none;
-        border-top: 1px solid #e2e8f0;
+        border-top: 1px solid #e5e7eb;
         margin: 2rem 0;
     }
     
     /* Spinner */
     .stSpinner > div {
-        border-color: #1e293b transparent transparent transparent;
+        border-color: #2d3748 transparent transparent transparent;
     }
     
     /* File Uploader */
     [data-testid="stFileUploader"] {
-        border: 2px dashed #e2e8f0;
+        border: 2px dashed #e5e7eb;
         border-radius: 0.5rem;
         padding: 2rem;
         text-align: center;
+        background: #fefefe;
         transition: all 0.2s;
     }
     
     [data-testid="stFileUploader"]:hover {
-        border-color: #1e293b;
-        background: #f8fafc;
+        border-color: #2d3748;
+        background: #fafafa;
     }
     
-    /* Login Form */
+    /* Login Form - Kar Beyazı */
     .login-container {
         max-width: 400px;
         margin: 4rem auto;
         padding: 2rem;
-        background: white;
-        border: 1px solid #e2e8f0;
+        background: #fefefe;
+        border: 1px solid #e5e7eb;
         border-radius: 1rem;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     }
     
     /* Table */
     .stDataFrame {
-        border: 1px solid #e2e8f0;
+        border: 1px solid #e5e7eb;
         border-radius: 0.5rem;
+        background: #fefefe;
+    }
+    
+    /* Selectbox */
+    .stSelectbox > div > div {
+        background: #fefefe;
+    }
+    
+    /* Text Area */
+    .stTextArea > div > div > textarea {
+        background: #fefefe;
     }
     
     /* Hide Streamlit Branding */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
+    
+    /* Icon Styles */
+    .icon {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        margin-right: 8px;
+        vertical-align: middle;
+        opacity: 0.7;
+    }
+    
+    /* Menu Icons */
+    .menu-icon {
+        font-size: 16px;
+        margin-right: 8px;
+        color: #4a5568;
+    }
 </style>
 """
+
+# Icon mapping - text-based icons
+ICONS = {
+    "chat": "💬",
+    "analytics": "📊",
+    "agents": "🤖",
+    "companies": "👥",
+    "upload": "📤",
+    "logout": "🚪"
+}
 
 # ==================== CONFIG ====================
 
@@ -347,12 +407,6 @@ def login_page():
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        st.markdown("""
-        <div class="login-container">
-            <h1 style="text-align: center; margin-bottom: 2rem;">RAG Platform</h1>
-        </div>
-        """, unsafe_allow_html=True)
-        
         st.markdown("### Giriş Yap")
         
         with st.form("login_form"):
@@ -404,7 +458,7 @@ def main_app():
         
         st.markdown("---")
         
-        # Menu
+        # Menu - Icon'ları kaldırıp sadece text kullanıyorum
         menu_options = ["Chat", "Analytics", "Agents", "Veri Yükle"]
         if user.get("isSuperAdmin"):
             menu_options.insert(3, "Şirket Yönetimi")
