@@ -76,22 +76,66 @@ backend = subprocess.Popen(
 )
 time.sleep(5)
 
-# Frontend başlat (Gradio)
+# Frontend başlat (Gradio) - stdout'u yakalayıp URL'yi bulmak için
+frontend_log = queue.Queue()
+gradio_url = None
+
+def read_output(pipe, q):
+    """Gradio çıktısını okuyup URL'yi yakala"""
+    global gradio_url
+    for line in iter(pipe.readline, ''):
+        if line:
+            q.put(line)
+            line_str = line.strip()
+            # Gradio public URL'yi yakala
+            if "Running on public URL:" in line_str:
+                gradio_url = line_str.split("Running on public URL:")[-1].strip()
+                print(f"\n🌐 Gradio Public URL: {gradio_url}")
+            elif "https://" in line_str and "gradio.live" in line_str:
+                gradio_url = line_str.strip()
+                print(f"\n🌐 Gradio Public URL: {gradio_url}")
+
+# Frontend'i başlat - stdout/stderr'i yakalıyoruz
 frontend = subprocess.Popen(
     [sys.executable, "app.py"],
     cwd="frontend_gradio",
-    stdout=subprocess.DEVNULL,
-    stderr=subprocess.DEVNULL,
+    stdout=subprocess.PIPE,
+    stderr=subprocess.STDOUT,
+    text=True,
+    bufsize=1,
     env={**os.environ, "API_BASE_URL": "http://localhost:3000"}
 )
-time.sleep(10)
+
+# Output'u okuyan thread başlat
+output_thread = threading.Thread(target=read_output, args=(frontend.stdout, frontend_log), daemon=True)
+output_thread.start()
+
+# Gradio'nun başlamasını bekle (URL'yi yakalamak için)
+print("⏳ Gradio başlatılıyor (public URL oluşturuluyor)...")
+time.sleep(15)
+
+# URL bulunamadıysa tekrar dene
+if not gradio_url:
+    time.sleep(5)
+    # Queue'den oku
+    try:
+        while not frontend_log.empty():
+            line = frontend_log.get_nowait()
+            if "https://" in line and "gradio.live" in line:
+                gradio_url = line.strip()
+                break
+    except:
+        pass
 
 print("✅ Servisler başlatıldı!")
 print("\n" + "=" * 60)
 print("📍 Backend: http://localhost:3000")
 print("📍 Frontend: http://localhost:7860")
-print("\n🔗 Gradio otomatik public URL oluşturacak (share=True)")
-print("   Terminal çıktısında 'Running on public URL:' yazısını bul")
+if gradio_url:
+    print(f"🌐 Gradio Public URL: {gradio_url}")
+else:
+    print("🔗 Public URL oluşturuluyor... (birkaç saniye bekle)")
+    print("   Terminal çıktısında 'Running on public URL:' yazısını kontrol et")
 print("\n🔑 Giriş: admin@ragplatform.com / Admin123!@#")
 print("=" * 60)
 
