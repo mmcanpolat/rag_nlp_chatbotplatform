@@ -6,12 +6,20 @@ export default defineConfig({
     port: 4200,
     strictPort: false,
 
-    // 🔴 KRİTİK SATIRLAR
+    // 🔴 Cloudflare için KRİTİK
     allowedHosts: 'all',
 
     hmr: {
-      clientPort: 443    // Cloudflare üzerinden geldiği için
+      clientPort: 443
+    },
+
+    // (API varsa önerilir)
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false
+      }
     }
   }
 });
-
