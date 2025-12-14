@@ -513,8 +513,18 @@ if __name__ == "__main__":
     except:
         is_colab = os.getenv("COLAB_RELEASE_TAG") is not None
     
+    # Colab'te her zaman share=True yap - public URL için
+    # Local'de environment variable ile kontrol edebiliriz
+    force_share = os.getenv("GRADIO_SHARE", "auto")
+    if force_share == "true" or (is_colab and force_share != "false"):
+        share_value = True
+    else:
+        share_value = False
+    
+    print(f"[*] Gradio başlatılıyor... (share={share_value})")
     app.launch(
         server_name="0.0.0.0",
         server_port=7860,
-        share=is_colab  # Colab'te True, local'de False
+        share=share_value,
+        show_error=True  # Hataları göster
     )
