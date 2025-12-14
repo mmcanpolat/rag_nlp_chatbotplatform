@@ -110,11 +110,11 @@ def main_app():
         st.markdown("---")
         
         # Menü
-        page = st.radio(
-            "Menü",
-            ["💬 Chat", "📊 Analytics", "🤖 Agents", "👥 Şirket Yönetimi" if user.get("isSuperAdmin") else None, "📤 Veri Yükle"],
-            filter(lambda x: x is not None, ["💬 Chat", "📊 Analytics", "🤖 Agents", "👥 Şirket Yönetimi" if user.get("isSuperAdmin") else None, "📤 Veri Yükle"])
-        )
+        menu_options = ["💬 Chat", "📊 Analytics", "🤖 Agents", "📤 Veri Yükle"]
+        if user.get("isSuperAdmin"):
+            menu_options.insert(3, "👥 Şirket Yönetimi")
+        
+        page = st.radio("Menü", menu_options)
         
         if st.button("🚪 Çıkış"):
             st.session_state.user = None
