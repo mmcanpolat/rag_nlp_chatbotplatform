@@ -3,14 +3,19 @@
 ## Başlatma
 
 ```bash
+# Proje dizinine git
+cd bil482-project
+
 # 1. Bağımlılıkları kur
 pip install -r python_services/requirements.txt
 
 # 2. Backend başlat (Terminal 1)
-cd backend_fastapi && python run.py
+cd backend_fastapi
+python run.py
 
-# 3. Frontend başlat (Terminal 2)
-cd frontend_streamlit && streamlit run app.py
+# 3. Frontend başlat (Terminal 2 - YENİ TERMİNAL)
+cd bil482-project/frontend_streamlit
+streamlit run app.py
 ```
 
 **Giriş:** `admin@ragplatform.com` / `Admin123!@#`
