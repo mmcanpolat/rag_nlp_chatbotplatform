@@ -118,14 +118,29 @@ print("✅ Servisler başlatıldı!")
 print("\n" + "=" * 60)
 print("📍 Backend: http://localhost:3000")
 print("📍 Frontend: http://localhost:7860")
+
+# Colab port forwarding - alternatif yöntem
+try:
+    from google.colab import output
+    # Colab'in port forwarding'ini kullan
+    print("\n🔗 Colab Port Forwarding:")
+    print("   Sağ üstteki 🔗 ikonuna tıklayıp port 7860'i seç")
+    print("   Veya aşağıdaki komutu çalıştır:")
+    print("   !pip install pyngrok && python -m pyngrok http 7860")
+except:
+    pass
+
 if gradio_url:
-    print(f"🌐 Gradio Public URL: {gradio_url}")
+    print(f"\n🌐 Gradio Public URL: {gradio_url}")
     print(f"   👆 Bu URL'yi kopyalayıp tarayıcıda aç!")
 else:
-    print("🔗 Public URL oluşturuluyor...")
+    print("\n🔗 Public URL oluşturuluyor...")
     print("   ⚠️  Birkaç saniye sonra log dosyasını kontrol et:")
     print(f"   📄 Log: {gradio_log_file}")
     print("   Veya Colab'te sağ üstteki 🔗 ikonuna tıklayıp port 7860'i seç")
+    print("\n   💡 Alternatif: Aşağıdaki komutu çalıştır:")
+    print("   !cat /tmp/gradio_output.log | grep 'public URL'")
+
 print("\n🔑 Giriş: admin@ragplatform.com / Admin123!@#")
 print("=" * 60)
 
