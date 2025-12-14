@@ -324,7 +324,7 @@ def build_ui():
                                 label="Model",
                                 interactive=True
                             )
-                            chatbot = gr.Chatbot(label="Chat", height=500, show_label=False)
+                            chatbot = gr.Chatbot(label="Chat", height=500, show_label=False, type="messages", allow_tags=False)
                             with gr.Row():
                                 chat_input = gr.Textbox(
                                     label="",
@@ -516,15 +516,26 @@ if __name__ == "__main__":
     """
     
     print(f"[*] Gradio başlatılıyor... (share={share_value})")
-    app.launch(
-        server_name="0.0.0.0",
-        server_port=7860,
-        share=share_value,
-        show_error=True,  # Hataları göster
-        theme=gr.themes.Soft(
-            primary_hue="slate",
-            neutral_hue="slate",
-            font=("Inter", "ui-sans-serif", "system-ui", "sans-serif")
-        ),
-        css=custom_css
-    )
+    # Gradio versiyonuna göre theme parametresini kontrol et
+    try:
+        # Yeni Gradio versiyonları için
+        app.launch(
+            server_name="0.0.0.0",
+            server_port=7860,
+            share=share_value,
+            show_error=True,
+            theme=gr.themes.Soft(
+                primary_hue="slate",
+                neutral_hue="slate",
+                font=("Inter", "ui-sans-serif", "system-ui", "sans-serif")
+            ),
+            css=custom_css
+        )
+    except TypeError:
+        # Eski Gradio versiyonları için theme olmadan
+        app.launch(
+            server_name="0.0.0.0",
+            server_port=7860,
+            share=share_value,
+            show_error=True
+        )
