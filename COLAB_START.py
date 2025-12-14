@@ -75,29 +75,83 @@ backend = subprocess.Popen(
 )
 time.sleep(5)
 
-# Frontend başlat (Gradio) - Colab'te share=True ile
-print("⏳ Gradio başlatılıyor...")
+# Frontend başlat (Gradio) - stdout'u yakalayıp URL'yi göster
+print("⏳ Gradio başlatılıyor (public URL oluşturuluyor)...")
+
+# Gradio stdout'unu yakalamak için pipe kullan
 frontend = subprocess.Popen(
     [sys.executable, "app.py"],
     cwd="frontend_gradio",
-    stdout=subprocess.DEVNULL,
-    stderr=subprocess.DEVNULL,
+    stdout=subprocess.PIPE,
+    stderr=subprocess.STDOUT,
+    text=True,
+    bufsize=1,
     env={**os.environ, "API_BASE_URL": "http://localhost:3000", "GRADIO_SHARE": "true"}
 )
-time.sleep(10)
 
-print("✅ Servisler başlatıldı!")
+# URL'yi yakalamak için stdout'u oku
+gradio_url = None
+import select
+
+# Non-blocking read için
+def read_gradio_output():
+    global gradio_url
+    import fcntl
+    # Unix-like sistemlerde non-blocking yap
+    try:
+        fl = fcntl.fcntl(frontend.stdout.fileno(), fcntl.F_GETFL)
+        fcntl.fcntl(frontend.stdout.fileno(), fcntl.F_SETFL, fl | os.O_NONBLOCK)
+    except:
+        pass
+    
+    lines_read = []
+    for _ in range(50):  # 50 iterasyon dene
+        time.sleep(0.5)
+        try:
+            line = frontend.stdout.readline()
+            if line:
+                line = line.strip()
+                lines_read.append(line)
+                print(line)  # Gradio çıktısını göster
+                
+                # URL'yi bul
+                if "Running on public URL:" in line:
+                    gradio_url = line.split("Running on public URL:")[-1].strip()
+                    print(f"\n✅ GRADIO PUBLIC URL BULUNDU: {gradio_url}")
+                    break
+                elif "https://" in line and "gradio.live" in line:
+                    # Direkt URL satırı
+                    for word in line.split():
+                        if "https://" in word and "gradio.live" in word:
+                            gradio_url = word.strip().rstrip(".,;")
+                            print(f"\n✅ GRADIO PUBLIC URL BULUNDU: {gradio_url}")
+                            break
+                    if gradio_url:
+                        break
+        except:
+            continue
+    
+    return gradio_url
+
+# URL'yi oku
+read_gradio_output()
+
 print("\n" + "=" * 60)
+print("✅ Servisler başlatıldı!")
+print("=" * 60)
 print("📍 Backend: http://localhost:3000")
 print("📍 Frontend: http://localhost:7860")
-print("\n🔗 Public URL için 2 yöntem:")
-print("\n   1️⃣  Colab Port Forwarding (ÖNERİLEN):")
-print("      → Sağ üstteki 🔗 ikonuna tıkla")
-print("      → Port: 7860 seç")
-print("      → Açılan URL'yi kullan")
-print("\n   2️⃣  Gradio Share URL (otomatik):")
-print("      → Birkaç saniye bekle, Gradio public URL oluşturacak")
-print("      → Terminal çıktısında 'Running on public URL:' yazısını ara")
+
+if gradio_url:
+    print(f"\n🌐 GRADIO PUBLIC URL:")
+    print(f"   {gradio_url}")
+    print(f"\n   👆 Bu URL'yi kopyalayıp tarayıcıda aç!")
+else:
+    print("\n⏳ Gradio public URL oluşturuluyor...")
+    print("   Yukarıdaki çıktıda 'Running on public URL:' satırını ara")
+    print("   Veya birkaç saniye bekle ve tekrar kontrol et")
+
 print("\n🔑 Giriş: admin@ragplatform.com / Admin123!@#")
 print("=" * 60)
+print("\n💡 Not: Gradio arka planda çalışıyor, public URL yukarıda görünecek")
 
