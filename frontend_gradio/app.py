@@ -6,6 +6,7 @@ import gradio as gr
 import requests
 import json
 import os
+import sys
 import time
 from typing import Optional, Dict, List, Tuple
 from pathlib import Path
@@ -505,8 +506,8 @@ def build_ui():
 if __name__ == "__main__":
     app = build_ui()
     # Colab'te share=True otomatik public URL oluşturur
-    # Local'de False olabilir, Colab'te True daha pratik
-    is_colab = os.getenv("COLAB_RELEASE_TAG") is not None
+    # Colab ortamını kontrol ediyorum
+    is_colab = os.getenv("COLAB_RELEASE_TAG") is not None or "google.colab" in str(sys.modules.keys())
     app.launch(
         server_name="0.0.0.0",
         server_port=7860,
