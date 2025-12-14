@@ -46,11 +46,19 @@ def api_request(method: str, endpoint: str, data: Optional[dict] = None) -> dict
         return {"success": False, "error": str(e)}
 
 def get_agents_dict():
+    """Agent listesini dict olarak döndürür (name -> id)"""
     result = api_request("GET", "/agents")
     if result.get("success"):
         agents = result["data"]
         return {f"{a['name']}": a['id'] for a in agents}
     return {}
+
+def update_agent_dropdowns():
+    """Agent dropdown'larını günceller"""
+    agents_dict = get_agents_dict()
+    choices = list(agents_dict.keys()) if agents_dict else ["Agent yok"]
+    value = choices[0] if choices and choices[0] != "Agent yok" else None
+    return gr.update(choices=choices, value=value), gr.update(choices=choices, value=value)
 
 # ==================== LOGIN ====================
 
@@ -78,21 +86,22 @@ def logout_handler():
 # ==================== CHAT ====================
 
 def chat_send_handler(message: str, agent_name: str, model: str, history: List):
-    if not message.strip():
-        return history, ""
+    if not message or not message.strip():
+        return history or [], ""
     
     if not agent_name or agent_name == "Agent yok":
-        return history, "Lütfen agent seçin"
+        return history or [], "Lütfen agent seçin"
     
     agents_dict = get_agents_dict()
     agent_id = agents_dict.get(agent_name)
     
     if not agent_id:
-        return history, "Agent bulunamadı"
+        return history or [], "Agent bulunamadı"
     
     # Kullanıcı mesajını ekle
     if history is None:
         history = []
+    history = history.copy() if history else []
     history.append([message, None])
     
     # API'ye istek gönder
@@ -154,15 +163,23 @@ def benchmark_handler(agent_name: str):
 **Ortalama Cosine:** {data.get('avg_cosine', 0):.4f}
         """
         
-        # Plot'ları göster
+        # Plot'ları göster - mutlak path kullan
         plot_path = None
         plots = result.get("plots", [])
+        # Base directory'yi bul - Colab'te veya local'de çalışabilir
+        try:
+            base_dir = Path(__file__).parent.parent
+        except:
+            base_dir = Path.cwd()
+        
         for plot_name in plots:
-            plot_path_test = f"frontend_gradio/assets/plots/{plot_name}"
-            if not os.path.exists(plot_path_test):
-                plot_path_test = f"python_services/data/plots/{plot_name}"
-            if os.path.exists(plot_path_test):
-                plot_path = plot_path_test
+            # Önce frontend_gradio/assets/plots kontrol et
+            plot_path_test = base_dir / "frontend_gradio" / "assets" / "plots" / plot_name
+            if not plot_path_test.exists():
+                # Sonra python_services/data/plots kontrol et
+                plot_path_test = base_dir / "python_services" / "data" / "plots" / plot_name
+            if plot_path_test.exists():
+                plot_path = str(plot_path_test.absolute())
                 break
         
         return metrics, plot_path
@@ -173,34 +190,25 @@ def benchmark_handler(agent_name: str):
 
 def create_agent_handler(name: str, embedding_model: str, data_source_type: str, file, url: str):
     if not name.strip():
-        return "Agent adı gerekli", get_agents_list()
+        return "Agent adı gerekli", get_agents_list(), gr.update(), gr.update()
     
     file_path = None
     if data_source_type == "file" and file:
-        # Gradio file uploader'dan gelen dosyayı işle
-        upload_dir = Path("python_services/data/uploads")
-        upload_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Dosya path'ini al (Gradio file objesi)
-        if hasattr(file, 'name'):
-            file_name = Path(file.name).name
-        else:
-            file_name = f"upload_{int(time.time() * 1000)}"
-        
-        temp_path = upload_dir / file_name
-        
-        # Dosyayı kaydet
-        if hasattr(file, 'read'):
-            with open(temp_path, "wb") as f:
-                f.write(file.read())
-        else:
-            # String path ise kopyala
-            import shutil
-            shutil.copy(file, temp_path)
-        
-        # Upload endpoint'ine gönder
+        # Gradio file uploader genellikle string path döner
+        # Ama bazen file object de olabilir, her iki durumu da handle ediyorum
         try:
-            with open(temp_path, "rb") as f:
+            # String path ise direkt kullan
+            if isinstance(file, str):
+                file_path_str = file
+            # File object ise name attribute'undan path al
+            elif hasattr(file, 'name'):
+                file_path_str = file.name
+            else:
+                return "Dosya formatı desteklenmiyor", get_agents_list(), gr.update(), gr.update()
+            
+            # Upload endpoint'ine gönder
+            with open(file_path_str, "rb") as f:
+                file_name = Path(file_path_str).name
                 files = {"file": (file_name, f, "application/octet-stream")}
                 headers = get_headers()
                 headers.pop("Content-Type", None)
@@ -216,9 +224,9 @@ def create_agent_handler(name: str, embedding_model: str, data_source_type: str,
             if upload_result.get("success"):
                 file_path = upload_result["data"]["filePath"]
             else:
-                return f"Upload hatası: {upload_result.get('error')}", get_agents_list()
+                return f"Upload hatası: {upload_result.get('error')}", get_agents_list(), gr.update(), gr.update()
         except Exception as e:
-            return f"Upload hatası: {str(e)}", get_agents_list()
+            return f"Upload hatası: {str(e)}", get_agents_list(), gr.update(), gr.update()
     
     agent_data = {
         "name": name,
@@ -230,9 +238,11 @@ def create_agent_handler(name: str, embedding_model: str, data_source_type: str,
     result = api_request("POST", "/agents", agent_data)
     
     if result.get("success"):
-        return "Agent oluşturuldu!", get_agents_list()
+        # Agent dropdown'ları güncelle
+        agent_update, analytics_update = update_agent_dropdowns()
+        return "Agent oluşturuldu!", get_agents_list(), agent_update, analytics_update
     else:
-        return f"Hata: {result.get('error', 'Agent oluşturulamadı')}", get_agents_list()
+        return f"Hata: {result.get('error', 'Agent oluşturulamadı')}", get_agents_list(), gr.update(), gr.update()
 
 def get_agents_list():
     result = api_request("GET", "/agents")
@@ -407,10 +417,7 @@ def build_ui():
             login_screen_vis, main_app_vis, status = login_handler(username, password)
             if main_app_vis.visible:
                 # Agent dropdown'ları güncelle
-                agents_dict = get_agents_dict()
-                choices = list(agents_dict.keys()) if agents_dict else ["Agent yok"]
-                agent_update = gr.update(choices=choices, value=choices[0] if choices and choices[0] != "Agent yok" else None)
-                analytics_update = gr.update(choices=choices, value=choices[0] if choices and choices[0] != "Agent yok" else None)
+                agent_update, analytics_update = update_agent_dropdowns()
                 
                 # User info güncelle
                 user = user_state.get("user", {})
@@ -466,10 +473,7 @@ def build_ui():
         create_agent_btn.click(
             create_agent_handler,
             inputs=[agent_name, embedding_model, data_source_type, agent_file, agent_url],
-            outputs=[agent_status, agents_list]
-        ).then(
-            update_agent_dropdown,
-            outputs=[agent_dropdown, analytics_agent]
+            outputs=[agent_status, agents_list, agent_dropdown, analytics_agent]
         )
         
         refresh_agents_btn.click(
