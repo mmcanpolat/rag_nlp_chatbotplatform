@@ -31,9 +31,11 @@ try:
     from rag_engine import RAGEngine
     from ingestor import DocumentIngestor
     from evaluator import Evaluator
-except ImportError:
+except ImportError as e:
     # Alternatif import yolu
     import importlib.util
+    python_services_path = Path(__file__).parent.parent / "python_services" / "scripts"
+    
     spec = importlib.util.spec_from_file_location("rag_engine", python_services_path / "rag_engine.py")
     rag_engine_module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(rag_engine_module)
