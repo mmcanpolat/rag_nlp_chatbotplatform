@@ -86,3 +86,19 @@ orjson>=3.9.0
 
 # Tip kontrolü
 typing-extensions>=4.5.0
+
+# =============================================
+# WEB FRAMEWORK (FastAPI + Streamlit)
+# =============================================
+# FastAPI - Modern Python web framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+
+# Streamlit - Web UI framework
+streamlit>=1.28.0
+
+# HTTP client
+requests>=2.31.0
+
+# File upload handling
+python-multipart>=0.0.6
