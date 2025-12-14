@@ -444,6 +444,7 @@ async def run_benchmark(request: dict, user: dict = Depends(require_auth)):
         evaluator = Evaluator(index_name=index_name)
         results = evaluator.evaluate_all()
         
+        # Plot isimlerini döndürüyorum - frontend'de gösterilecek
         return {
             "success": True,
             "data": results,

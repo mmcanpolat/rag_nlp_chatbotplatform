@@ -34,7 +34,8 @@ DEFAULT_EMBEDDING = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
 THRESHOLD = 0.65  # Bu değerin üstü "doğru" sayılıyor - cosine similarity için
 
 
-class ModelEvaluator:
+class Evaluator:
+    # ModelEvaluator yerine Evaluator kullanıyorum - daha kısa
     # Modelleri test edip karşılaştırma raporu çıkarıyorum
     # Grafikleri plots klasörüne kaydediyorum
     
@@ -231,7 +232,7 @@ class ModelEvaluator:
         ax.set_ylim(0, 1.15)
         
         plt.tight_layout()
-        plt.savefig(PLOTS_DIR / 'metrics_comparison.png', dpi=150, bbox_inches='tight', facecolor='white')
+        plt.savefig(PLOTS_DIR / 'metrics_comparison_bar.png', dpi=150, bbox_inches='tight', facecolor='white')
         plt.close()
     
     def _plot_time(self, colors):
@@ -304,6 +305,30 @@ class ModelEvaluator:
             json.dump(out, f, indent=2)
         
         return out
+    
+    def evaluate_all(self) -> Dict:
+        # Backend'den çağrılan metod - run() metodunu çağırıp plot'ları oluşturuyor
+        # Sonuçları döndürüyor
+        results = self.run()
+        if results:
+            self.plot()
+            self.save_json()
+            
+            # Ortalama metrikleri hesaplıyorum - tüm modellerin ortalaması
+            all_cosine = [d['avg_cosine'] for d in results.values()]
+            all_rouge = [d['avg_rouge'] for d in results.values()]
+            all_f1 = [d['avg_f1'] for d in results.values()]
+            all_accuracy = [d['accuracy'] for d in results.values()]
+            
+            return {
+                'avg_accuracy': sum(all_accuracy) / len(all_accuracy) if all_accuracy else 0,
+                'avg_bleu': 0.0,  # BLEU hesaplanmıyor şimdilik, ileride eklenebilir
+                'avg_rouge': sum(all_rouge) / len(all_rouge) if all_rouge else 0,
+                'avg_f1': sum(all_f1) / len(all_f1) if all_f1 else 0,
+                'avg_cosine': sum(all_cosine) / len(all_cosine) if all_cosine else 0,
+                'models': results
+            }
+        return {}
 
 
 def main():
@@ -317,7 +342,7 @@ def main():
     print("Model Değerlendirme")
     print("="*50)
     
-    ev = ModelEvaluator(args.index)
+    ev = Evaluator(args.index)
     results = ev.run()
     
     if results:

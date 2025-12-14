@@ -261,12 +261,17 @@ def analytics_page():
             with col4:
                 st.metric("Ortalama F1", f"{data.get('avg_f1', 0):.4f}")
             
-            # Plot'ları göster
+            # Plot'ları göster - frontend_streamlit/assets/plots/ klasöründen
             plots = result.get("plots", [])
             for plot_name in plots:
-                plot_path = f"python_services/data/plots/{plot_name}"
+                # Önce frontend klasöründe ara, yoksa python_services'te ara
+                plot_path = f"frontend_streamlit/assets/plots/{plot_name}"
+                if not os.path.exists(plot_path):
+                    plot_path = f"python_services/data/plots/{plot_name}"
                 if os.path.exists(plot_path):
                     st.image(plot_path)
+                else:
+                    st.warning(f"Plot bulunamadı: {plot_name}")
         else:
             st.error(result.get("error", "Benchmark hatası"))
 
