@@ -14,8 +14,8 @@ cd backend_fastapi
 python run.py
 
 # 4. Frontend başlat (Terminal 2 - YENİ TERMİNAL)
-cd bil482-project/frontend_streamlit
-streamlit run app.py
+cd bil482-project/frontend_gradio
+python app.py
 ```
 
 **Giriş:** `admin@ragplatform.com` / `Admin123!@#`
