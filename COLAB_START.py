@@ -91,50 +91,37 @@ frontend = subprocess.Popen(
 
 # URL'yi yakalamak için stdout'u oku
 gradio_url = None
-import select
+print("\n📡 Gradio çıktısı dinleniyor (public URL aranıyor)...\n")
 
-# Non-blocking read için
-def read_gradio_output():
-    global gradio_url
-    import fcntl
-    # Unix-like sistemlerde non-blocking yap
+# 25 saniye boyunca stdout'u oku
+for i in range(50):  # 50 x 0.5 = 25 saniye
+    time.sleep(0.5)
     try:
-        fl = fcntl.fcntl(frontend.stdout.fileno(), fcntl.F_GETFL)
-        fcntl.fcntl(frontend.stdout.fileno(), fcntl.F_SETFL, fl | os.O_NONBLOCK)
-    except:
-        pass
-    
-    lines_read = []
-    for _ in range(50):  # 50 iterasyon dene
-        time.sleep(0.5)
-        try:
+        # Non-blocking read
+        import select
+        if select.select([frontend.stdout], [], [], 0)[0]:
             line = frontend.stdout.readline()
             if line:
                 line = line.strip()
-                lines_read.append(line)
                 print(line)  # Gradio çıktısını göster
                 
                 # URL'yi bul
                 if "Running on public URL:" in line:
                     gradio_url = line.split("Running on public URL:")[-1].strip()
-                    print(f"\n✅ GRADIO PUBLIC URL BULUNDU: {gradio_url}")
+                    print(f"\n✅ GRADIO PUBLIC URL BULUNDU: {gradio_url}\n")
                     break
-                elif "https://" in line and "gradio.live" in line:
+                elif "https://" in line and ("gradio.live" in line or "gradio.app" in line):
                     # Direkt URL satırı
                     for word in line.split():
-                        if "https://" in word and "gradio.live" in word:
+                        if "https://" in word and ("gradio.live" in word or "gradio.app" in word):
                             gradio_url = word.strip().rstrip(".,;")
-                            print(f"\n✅ GRADIO PUBLIC URL BULUNDU: {gradio_url}")
+                            print(f"\n✅ GRADIO PUBLIC URL BULUNDU: {gradio_url}\n")
                             break
                     if gradio_url:
                         break
-        except:
-            continue
-    
-    return gradio_url
-
-# URL'yi oku
-read_gradio_output()
+    except:
+        # select modülü yoksa veya hata varsa devam et
+        continue
 
 print("\n" + "=" * 60)
 print("✅ Servisler başlatıldı!")
