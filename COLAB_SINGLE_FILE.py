@@ -524,6 +524,78 @@ def build_gradio_ui():
     current_token = None
     current_agents = []
     
+    # Custom CSS - Koyu tema, profesyonel
+    custom_css = """
+    .gradio-container {
+        background: #1a1a1a !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    }
+    .gr-button-primary {
+        background: #3b82f6 !important;
+        color: white !important;
+        border: none !important;
+        font-weight: 500 !important;
+    }
+    .gr-button-primary:hover {
+        background: #2563eb !important;
+    }
+    .gr-button {
+        background: #4b5563 !important;
+        color: white !important;
+        border: none !important;
+    }
+    .gr-button:hover {
+        background: #6b7280 !important;
+    }
+    .gr-textbox input, .gr-textbox textarea {
+        background: #2d2d2d !important;
+        color: #e5e5e5 !important;
+        border: 1px solid #404040 !important;
+    }
+    .gr-textbox input:focus, .gr-textbox textarea:focus {
+        border-color: #3b82f6 !important;
+        outline: none !important;
+    }
+    .gr-textbox label {
+        color: #d1d5db !important;
+        font-weight: 500 !important;
+    }
+    .gr-markdown {
+        color: #e5e5e5 !important;
+    }
+    .gr-markdown h1, .gr-markdown h2, .gr-markdown h3 {
+        color: #ffffff !important;
+    }
+    .gr-radio label {
+        color: #d1d5db !important;
+    }
+    .gr-dropdown {
+        background: #2d2d2d !important;
+        color: #e5e5e5 !important;
+        border: 1px solid #404040 !important;
+    }
+    .gr-tabs {
+        background: #1a1a1a !important;
+    }
+    .gr-tab {
+        background: #2d2d2d !important;
+        color: #d1d5db !important;
+    }
+    .gr-tab.selected {
+        background: #3b82f6 !important;
+        color: white !important;
+    }
+    .gr-chatbot {
+        background: #2d2d2d !important;
+    }
+    .gr-chatbot .message {
+        color: #e5e5e5 !important;
+    }
+    body {
+        background: #1a1a1a !important;
+    }
+    """
+    
     def login_fn(username, password):
         if not username or not password:
             return (
@@ -786,7 +858,7 @@ def build_gradio_ui():
     }
     """
     
-    with gr.Blocks(title="RAG SaaS Platform", css=custom_css) as app:
+    with gr.Blocks(title="RAG SaaS Platform") as app:
         gr.Markdown("# RAG SaaS Platform")
         
         with gr.Tab("Giriş", visible=True) as login_tab:
@@ -865,7 +937,7 @@ def build_gradio_ui():
             outputs=[login_status, login_tab, chat_tab, companies_tab, agents_tab, agent_dropdown]
         )
     
-    return app
+    return app, custom_css
 
 # ==================== STARTUP ====================
 def run_backend():
