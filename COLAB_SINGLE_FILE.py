@@ -347,28 +347,63 @@ def build_gradio_ui():
             import requests
             resp = requests.post(
                 "http://localhost:3000/api/auth/login",
-                json={"username": username, "password": password}
+                json={"username": username, "password": password},
+                timeout=5
             )
             if resp.status_code == 200:
                 data = resp.json()
-                nonlocal current_user, current_token
+                nonlocal current_user, current_token, current_agents
                 current_user = data["user"]
                 current_token = data["token"]
-                return f"✅ Giriş başarılı: {current_user.get('username', '')}", gr.update(visible=True), gr.update(visible=current_user.get("isSuperAdmin", False))
-            return "❌ Giriş başarısız", gr.update(visible=False), gr.update(visible=False)
+                # Agent listesini güncelle
+                try:
+                    agent_resp = requests.get(
+                        "http://localhost:3000/api/agents",
+                        headers={"Authorization": f"Bearer {current_token}"},
+                        timeout=5
+                    )
+                    if agent_resp.status_code == 200:
+                        current_agents = agent_resp.json()["data"]
+                        agent_choices = [f"{a['name']} ({a['id']})" for a in current_agents]
+                    else:
+                        agent_choices = []
+                except:
+                    agent_choices = []
+                
+                return (
+                    f"✅ Giriş başarılı: {current_user.get('username', '')}",
+                    gr.update(visible=True),
+                    gr.update(visible=current_user.get("isSuperAdmin", False)),
+                    gr.update(choices=agent_choices, value=agent_choices[0] if agent_choices else None)
+                )
+            return "❌ Giriş başarısız", gr.update(visible=False), gr.update(visible=False), gr.update()
         except Exception as e:
-            return f"❌ Hata: {str(e)}", gr.update(visible=False), gr.update(visible=False)
+            return f"❌ Hata: {str(e)}", gr.update(visible=False), gr.update(visible=False), gr.update()
     
-    def chat_fn(message, history, agent_id, model):
+    def chat_fn(message, history, agent_name, model):
         if not current_token:
             return history, "Önce giriş yapın"
+        
+        if not agent_name or not current_agents:
+            return history, "Agent seçin"
+        
+        # Agent ID'yi bul
+        agent_id = None
+        for a in current_agents:
+            if f"{a['name']} ({a['id']})" == agent_name:
+                agent_id = a['id']
+                break
+        
+        if not agent_id:
+            return history, "Agent bulunamadı"
         
         try:
             import requests
             resp = requests.post(
                 "http://localhost:3000/api/chat",
                 json={"agent_id": agent_id, "query": message, "model": model},
-                headers={"Authorization": f"Bearer {current_token}"}
+                headers={"Authorization": f"Bearer {current_token}"},
+                timeout=60
             )
             if resp.status_code == 200:
                 data = resp.json()["data"]
@@ -414,7 +449,7 @@ def build_gradio_ui():
         login_btn.click(
             login_fn,
             inputs=[login_user, login_pass],
-            outputs=[login_status, chat_tab, companies_tab]
+            outputs=[login_status, chat_tab, companies_tab, agent_dropdown]
         )
     
     return app
