@@ -510,6 +510,11 @@ if __name__ == "__main__":
         print(f"[*] Local ortam → share=False")
     
     # Colab'te kesinlikle share=True yap (güvenlik için tekrar kontrol)
+    # Environment variable varsa öncelik ver
+    if os.getenv("GRADIO_SHARE", "").lower() == "true":
+        share_value = True
+        print("[*] GRADIO_SHARE=true environment variable → share=True zorlanıyor")
+    
     try:
         import google.colab
         share_value = True
@@ -518,6 +523,7 @@ if __name__ == "__main__":
         pass
     
     print(f"[DEBUG] is_colab={is_colab}, GRADIO_SHARE={force_share}, share_value={share_value}")
+    print(f"[DEBUG] Final share_value={share_value} (Colab'te True olmalı!)")
     
     # Custom CSS - Snow White Theme
     custom_css = """
