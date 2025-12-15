@@ -1027,9 +1027,11 @@ def build_gradio_ui():
                     agent_source_type_hidden = gr.State(value="file")
                     
                     def agent_click_wrapper(name, embedding_model, data_source_type, data_source, uploaded_file, progress_output):
-                        print(f"[DEBUG] agent_click_wrapper çağrıldı: name={name}")
+                        print(f"[DEBUG] agent_click_wrapper çağrıldı: name={name}, uploaded_file={uploaded_file}")
                         try:
-                            return create_agent_fn(name, embedding_model, data_source_type, data_source, uploaded_file, progress_output)
+                            result = create_agent_fn(name, embedding_model, data_source_type, data_source, uploaded_file, progress_output)
+                            print(f"[DEBUG] create_agent_fn sonucu: {result}")
+                            return result
                         except Exception as e:
                             import traceback
                             error_detail = traceback.format_exc()
