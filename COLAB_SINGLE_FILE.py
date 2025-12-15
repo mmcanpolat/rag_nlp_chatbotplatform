@@ -900,11 +900,14 @@ def build_gradio_ui():
                     except:
                         pass
                     
-                    success_msg = f"""✅ **Agent başarıyla oluşturuldu!**
+                    index_name = agent_data.get("indexName", "N/A")
+                    
+                    success_msg = f"""✅ **Agent Başarıyla Oluşturuldu!**
 
 📋 **Agent Bilgileri:**
 - **Ad:** {name}
-- **ID:** {agent_id}
+- **ID:** `{agent_id}`
+- **Index Adı:** `{index_name}`
 - **Index:** {agent_data.get('indexName', 'N/A')}
 - **İşlenen Parça Sayısı:** {chunks}
 - **Embedding Model:** {embedding_model}
