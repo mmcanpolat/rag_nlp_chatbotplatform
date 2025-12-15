@@ -501,12 +501,16 @@ if __name__ == "__main__":
     force_share = os.getenv("GRADIO_SHARE", "").lower()
     
     # Colab'te veya GRADIO_SHARE=true ise share=True
+    # Colab'te her zaman share=True yap (public URL için)
     if force_share == "true" or is_colab:
         share_value = True
-        print(f"[*] Colab algılandı veya GRADIO_SHARE=true → share=True")
+        print(f"[*] Colab algılandı veya GRADIO_SHARE=true → share=True (public URL oluşturulacak)")
     else:
         share_value = False
         print(f"[*] Local ortam → share=False")
+    
+    # DEBUG: Kontrol için
+    print(f"[DEBUG] is_colab={is_colab}, GRADIO_SHARE={force_share}, share_value={share_value}")
     
     # Custom CSS - Snow White Theme
     custom_css = """
