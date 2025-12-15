@@ -26,8 +26,9 @@ print("\n[1/5] Bağımlılıklar kontrol ediliyor...")
 
 required_packages = [
     "fastapi", "uvicorn[standard]", "gradio>=4.0.0", "langchain", "langchain-community",
-    "langchain-huggingface", "transformers", "torch", "sentence-transformers",
-    "faiss-cpu", "pypdf", "docx2txt", "beautifulsoup4", "requests", "python-dotenv"
+    "langchain-huggingface", "langchain-text-splitters", "transformers", "torch", 
+    "sentence-transformers", "faiss-cpu", "pypdf", "docx2txt", "beautifulsoup4", 
+    "requests", "python-dotenv"
 ]
 
 missing = []
@@ -72,8 +73,11 @@ from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders import (
     PyPDFLoader, WebBaseLoader, Docx2txtLoader, TextLoader, JSONLoader, CSVLoader
 )
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.schema import Document
+try:
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+except ImportError:
+    from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_core.documents import Document
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 import torch
 
