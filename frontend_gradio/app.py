@@ -523,26 +523,27 @@ if __name__ == "__main__":
     """
     
     print(f"[*] Gradio başlatılıyor... (share={share_value})")
+    print(f"[*] Public URL oluşturulacak: {share_value}")
+    
     # Gradio versiyonuna göre theme parametresini kontrol et
+    launch_kwargs = {
+        "server_name": "0.0.0.0",
+        "server_port": 7860,
+        "share": share_value,  # Colab'te True olmalı
+        "show_error": True
+    }
+    
     try:
-        # Yeni Gradio versiyonları için
-        app.launch(
-            server_name="0.0.0.0",
-            server_port=7860,
-            share=share_value,
-            show_error=True,
-            theme=gr.themes.Soft(
-                primary_hue="slate",
-                neutral_hue="slate",
-                font=("Inter", "ui-sans-serif", "system-ui", "sans-serif")
-            ),
-            css=custom_css
+        # Yeni Gradio versiyonları için theme ekle
+        launch_kwargs["theme"] = gr.themes.Soft(
+            primary_hue="slate",
+            neutral_hue="slate",
+            font=("Inter", "ui-sans-serif", "system-ui", "sans-serif")
         )
-    except TypeError:
+        launch_kwargs["css"] = custom_css
+        app.launch(**launch_kwargs)
+    except (TypeError, AttributeError):
         # Eski Gradio versiyonları için theme olmadan
-        app.launch(
-            server_name="0.0.0.0",
-            server_port=7860,
-            share=share_value,
-            show_error=True
-        )
+        launch_kwargs.pop("theme", None)
+        launch_kwargs.pop("css", None)
+        app.launch(**launch_kwargs)
