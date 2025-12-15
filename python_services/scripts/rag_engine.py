@@ -17,7 +17,8 @@ load_dotenv()
 
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-from openai import OpenAI
+from transformers import GPT2LMHeadModel, GPT2Tokenizer
+import torch
 
 # Dizin ayarları - FAISS index'leri burada tutuluyor
 BASE_DIR = Path(__file__).parent.parent
@@ -36,7 +37,8 @@ class RAGEngine:
         self.index_path = INDEX_DIR / index_name
         self.vectorstore = None  # FAISS index'i buraya yüklenecek
         self._embeddings = None  # Lazy load yapıyorum, gerektiğinde yükleniyor
-        self.openai_client = None  # OpenAI client'ı
+        self._gpt_model = None  # Hugging Face GPT modeli
+        self._gpt_tokenizer = None  # GPT tokenizer
         
         self._setup()
     
@@ -71,19 +73,14 @@ class RAGEngine:
         return DEFAULT_EMBEDDING
     
     def _setup(self):
-        # Başlangıçta FAISS'i yüklüyorum ve OpenAI client'ı hazırlıyorum
+        # Başlangıçta FAISS'i yüklüyorum ve Hugging Face GPT modelini hazırlıyorum
         print("[*] RAG engine başlatılıyor...")
         
         # FAISS index'ini yüklüyorum
         self._load_vectorstore()
         
-        # OpenAI client'ı hazırlıyorum - API key varsa
-        api_key = os.getenv("OPENAI_API_KEY")
-        if api_key:
-            self.openai_client = OpenAI(api_key=api_key)
-            print("[+] OpenAI bağlantısı OK")
-        else:
-            print("[!] OPENAI_API_KEY yok, GPT çalışmaz")
+        # Hugging Face GPT modeli lazy load yapılacak - ilk kullanımda yüklenecek
+        print("[+] GPT modeli hazır (lazy load)")
     
     def _load_vectorstore(self) -> bool:
         # FAISS index'ini yüklüyorum - daha önce oluşturulmuş olmalı
@@ -121,39 +118,83 @@ class RAGEngine:
             'metadata': doc.metadata
         } for doc, score in results]
     
+    def _load_gpt_model(self):
+        # Hugging Face GPT-2 modelini lazy load yapıyorum - ilk kullanımda yükleniyor
+        if self._gpt_model is None:
+            print("[*] Hugging Face GPT-2 modeli yükleniyor...")
+            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+            # Türkçe GPT-2 modeli kullanıyorum
+            model_name = "dbmdz/gpt2-turkish-cased"
+            try:
+                self._gpt_tokenizer = GPT2Tokenizer.from_pretrained(model_name)
+                self._gpt_model = GPT2LMHeadModel.from_pretrained(model_name)
+                self._gpt_model.to(device)
+                self._gpt_model.eval()  # Inference modu
+                # Pad token yoksa eos token kullan
+                if self._gpt_tokenizer.pad_token is None:
+                    self._gpt_tokenizer.pad_token = self._gpt_tokenizer.eos_token
+                print(f"[+] GPT-2 modeli yüklendi ({device})")
+            except Exception as e:
+                print(f"[!] GPT-2 yükleme hatası: {e}")
+                # Fallback: İngilizce GPT-2
+                print("[*] İngilizce GPT-2 deneniyor...")
+                self._gpt_tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+                self._gpt_model = GPT2LMHeadModel.from_pretrained("gpt2")
+                self._gpt_model.to(device)
+                self._gpt_model.eval()
+                if self._gpt_tokenizer.pad_token is None:
+                    self._gpt_tokenizer.pad_token = self._gpt_tokenizer.eos_token
+    
     def _ask_gpt(self, query: str, contexts: List[str]) -> Tuple[str, float]:
-        # OpenAI GPT'ye soruyorum - context'leri de veriyorum
-        if not self.openai_client:
-            return "API key yok", 0.0
-        
-        # Context'leri birleştirip prompt'a ekliyorum
-        ctx_text = "\n\n".join([f"[{i+1}] {c}" for i, c in enumerate(contexts)])
-        
-        prompt = f"""Aşağıdaki bilgilere göre soruyu yanıtla.
-Bilgi yoksa "Bu konuda bilgi yok" de.
-
-BİLGİLER:
-{ctx_text}
-
-SORU: {query}
-CEVAP:"""
-        
+        # Hugging Face GPT-2 modeline soruyorum - context'leri de veriyorum
         try:
-            resp = self.openai_client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": "Kısa ve net cevaplar ver."},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.3,
-                max_tokens=400,
-                timeout=60
-            )
-            answer = resp.choices[0].message.content.strip()
-            conf = 0.85 if len(answer) > 20 else 0.6
+            # Modeli yükle (lazy load)
+            self._load_gpt_model()
+            
+            if self._gpt_model is None:
+                return "GPT modeli yüklenemedi", 0.0
+            
+            # Context'leri birleştirip prompt'a ekliyorum
+            ctx_text = "\n\n".join([f"[{i+1}] {c[:200]}" for i, c in enumerate(contexts)])  # Her context max 200 karakter
+            prompt = f"Bilgiler: {ctx_text}\n\nSoru: {query}\nCevap:"
+            
+            # Tokenize et
+            device = next(self._gpt_model.parameters()).device
+            inputs = self._gpt_tokenizer.encode(prompt, return_tensors="pt", max_length=512, truncation=True)
+            inputs = inputs.to(device)
+            
+            # Generate - kısa cevaplar için max_length düşük
+            with torch.no_grad():
+                outputs = self._gpt_model.generate(
+                    inputs,
+                    max_length=inputs.shape[1] + 100,  # 100 token daha üret
+                    min_length=inputs.shape[1] + 10,   # En az 10 token
+                    temperature=0.7,
+                    do_sample=True,
+                    pad_token_id=self._gpt_tokenizer.eos_token_id,
+                    eos_token_id=self._gpt_tokenizer.eos_token_id,
+                    repetition_penalty=1.2
+                )
+            
+            # Decode et - sadece yeni üretilen kısmı al
+            generated = outputs[0][inputs.shape[1]:]
+            answer = self._gpt_tokenizer.decode(generated, skip_special_tokens=True).strip()
+            
+            # Eğer cevap çok kısa veya boşsa, context'ten bir cümle al
+            if len(answer) < 10:
+                if contexts:
+                    answer = contexts[0][:200] + "..."
+                    conf = 0.6
+                else:
+                    answer = "Bu konuda yeterli bilgi bulunamadı."
+                    conf = 0.3
+            else:
+                # Güven skoru - cevap uzunluğuna göre
+                conf = min(0.85, 0.5 + len(answer) / 200)
+            
             return answer, conf
         except Exception as e:
-            return f"GPT hatası: {e}", 0.0
+            return f"GPT hatası: {str(e)}", 0.0
     
     def _ask_bert_cased(self, query: str, contexts: List[str]) -> Tuple[str, float]:
         # BERT için basit yaklaşım kullanıyorum - gerçek QA modeli değil ama idare ediyor

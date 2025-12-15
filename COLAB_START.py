@@ -27,50 +27,9 @@ print("\n[2/5] Bağımlılıklar kuruluyor (5-10 dakika)...")
 subprocess.run([sys.executable, "-m", "pip", "install", "-q", "-r", "python_services/requirements.txt"], check=True)
 print("✅ Bağımlılıklar kuruldu")
 
-# 3. API Key al - Colab Secrets'tan okuma (zorunlu)
-print("\n[3/5] API Key Colab Secrets'tan okunuyor...")
-OPENAI_API_KEY = None
-
-try:
-    from google.colab import userdata
-    # Colab Secrets'tan oku
-    OPENAI_API_KEY = userdata.get('OPENAI_API_KEY')
-    if OPENAI_API_KEY:
-        print("✅ API key Colab Secrets'tan alındı")
-    else:
-        # Secrets'ta yoksa hata ver
-        raise ValueError("OPENAI_API_KEY bulunamadı")
-except ImportError:
-    # Colab dışında çalışıyorsa (local test için)
-    print("⚠️ Colab ortamı değil, manuel API key isteniyor...")
-    OPENAI_API_KEY = getpass("OpenAI API Key girin (görünmez): ")
-    if not OPENAI_API_KEY:
-        raise ValueError("❌ API Key gerekli!")
-except ValueError as e:
-    # Secrets'ta key yoksa
-    print(f"\n❌ HATA: {str(e)}")
-    print("\n📋 Colab Secrets'a API Key ekleme adımları:")
-    print("   1. Sol menüden 🔑 Secrets sekmesine tıkla")
-    print("   2. + Add Secret butonuna tıkla")
-    print("   3. Name: OPENAI_API_KEY (tam olarak bu isim)")
-    print("   4. Value: OpenAI API key'ini yapıştır")
-    print("   5. Save butonuna tıkla")
-    print("   6. Bu hücreyi tekrar çalıştır\n")
-    raise ValueError("Colab Secrets'ta 'OPENAI_API_KEY' bulunamadı!")
-except Exception as e:
-    # Diğer hatalar
-    print(f"\n❌ Colab Secrets hatası: {str(e)}")
-    print("\n📋 Colab Secrets'a API Key ekleme adımları:")
-    print("   1. Sol menüden 🔑 Secrets sekmesine tıkla")
-    print("   2. + Add Secret butonuna tıkla")
-    print("   3. Name: OPENAI_API_KEY (tam olarak bu isim)")
-    print("   4. Value: OpenAI API key'ini yapıştır")
-    print("   5. Save butonuna tıkla\n")
-    raise
-
-# Son kontrol - API key boş olamaz
-if not OPENAI_API_KEY or OPENAI_API_KEY.strip() == "":
-    raise ValueError("❌ API Key boş! Colab Secrets'ta 'OPENAI_API_KEY' eklediğinden emin ol.")
+# 3. API Key artık gerekli değil - Hugging Face modelleri kullanıyoruz
+print("\n[3/5] API Key kontrolü atlanıyor (Hugging Face modelleri kullanılıyor)...")
+print("✅ OpenAI API key gerekmiyor - tüm modeller Hugging Face'ten")
 
 # 4. .env dosyalarını oluştur
 print("\n[4/5] Yapılandırma dosyaları oluşturuluyor...")
@@ -79,12 +38,9 @@ Path("python_services").mkdir(exist_ok=True)
 Path("frontend_gradio/assets/plots").mkdir(parents=True, exist_ok=True)
 
 with open("backend_fastapi/.env", "w") as f:
-    f.write(f"PORT=3000\nOPENAI_API_KEY={OPENAI_API_KEY}\nREQUEST_TIMEOUT=600000")
+    f.write(f"PORT=3000\nREQUEST_TIMEOUT=600000")
 
-with open("python_services/.env", "w") as f:
-    f.write(f"OPENAI_API_KEY={OPENAI_API_KEY}")
-
-os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
+# OpenAI API key artık gerekmiyor
 os.environ['API_BASE_URL'] = "http://localhost:3000"
 os.environ['GRADIO_SHARE'] = "true"  # Colab'te her zaman share=True
 print("✅ Yapılandırma tamamlandı")

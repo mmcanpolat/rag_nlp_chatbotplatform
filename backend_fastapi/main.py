@@ -57,7 +57,6 @@ BASE_DIR = Path(__file__).parent.parent
 UPLOAD_DIR = BASE_DIR / "python_services" / "data" / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)  # uploads klasörü yoksa oluştur
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 REQUEST_TIMEOUT = int(os.getenv("REQUEST_TIMEOUT", "600000"))  # 10 dakika - büyük dosyalar için
 
 # ==================== FASTAPI APP ====================

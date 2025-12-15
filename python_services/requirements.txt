@@ -44,9 +44,9 @@ sentence-transformers>=2.2.0
 huggingface_hub[hf_xet]>=0.20.0
 
 # =============================================
-# OPENAI API
+# OPENAI API - KALDIRILDI (Hugging Face kullanılıyor)
 # =============================================
-openai>=1.3.0
+# openai>=1.3.0  # Artık gerekmiyor - GPT-2 Hugging Face'ten kullanılıyor
 
 # =============================================
 # DEĞERLENDİRME METRİKLERİ

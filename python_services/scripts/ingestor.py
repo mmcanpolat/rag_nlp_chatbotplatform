@@ -33,11 +33,10 @@ DATA_DIR = BASE_DIR / "data"
 INDEX_DIR = DATA_DIR / "faiss_index"
 UPLOADS_DIR = DATA_DIR / "uploads"
 
-# Embedding modelleri - şimdilik sadece HuggingFace destekliyorum
-# OpenAI embedding'i de eklenebilir ama ayrı işlem gerekiyor
+# Embedding modelleri - sadece HuggingFace destekliyoruz
+# OpenAI embedding kaldırıldı - tamamen Hugging Face kullanıyoruz
 EMBEDDING_MODELS = {
-    'paraphrase-multilingual-MiniLM-L12-v2': 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2',
-    'text-embedding-3-large': 'text-embedding-3-large'  # OpenAI için ayrı işlem gerekir
+    'paraphrase-multilingual-MiniLM-L12-v2': 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
 }
 DEFAULT_EMBEDDING = 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
 
