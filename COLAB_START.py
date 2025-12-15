@@ -75,40 +75,66 @@ backend = subprocess.Popen(
 )
 time.sleep(5)
 
-# Frontend başlat (Gradio) - en basit yöntem
-print("⏳ Gradio başlatılıyor...")
+# Frontend başlat (Gradio) - public URL için share=True zorunlu
+print("⏳ Gradio başlatılıyor (public URL oluşturuluyor)...")
 
-# Gradio'yu arka planda başlat - log dosyasına yaz
+# Gradio'yu arka planda başlat - stdout'u yakala
 gradio_log = "/tmp/gradio.log"
 frontend = subprocess.Popen(
     [sys.executable, "app.py"],
     cwd="frontend_gradio",
     stdout=open(gradio_log, "w"),
     stderr=subprocess.STDOUT,
-    env={**os.environ, "API_BASE_URL": "http://localhost:3000", "GRADIO_SHARE": "true"}
+    env={**os.environ, "API_BASE_URL": "http://localhost:3000", "GRADIO_SHARE": "true"},
+    text=True,
+    bufsize=1
 )
 
-# Gradio başlaması için kısa bekleme
-time.sleep(8)
-
-# Log dosyasından URL'yi oku
+# Gradio başlaması için bekleme - public URL oluşması zaman alabilir
+print("📡 Gradio çıktısı dinleniyor (public URL aranıyor)...")
 gradio_url = None
-try:
-    if os.path.exists(gradio_log):
-        with open(gradio_log, "r") as f:
-            for line in f:
-                if "Running on public URL:" in line:
-                    gradio_url = line.split("Running on public URL:")[-1].strip()
-                    break
-                elif "https://" in line and ("gradio.live" in line or "gradio.app" in line):
-                    for word in line.split():
-                        if "https://" in word and ("gradio.live" in word or "gradio.app" in word):
-                            gradio_url = word.strip().rstrip(".,;")
+
+# 30 saniye boyunca log dosyasını kontrol et
+for i in range(30):
+    time.sleep(1)
+    try:
+        if os.path.exists(gradio_log):
+            with open(gradio_log, "r") as f:
+                content = f.read()
+                # Public URL'i ara
+                if "Running on public URL:" in content:
+                    for line in content.split("\n"):
+                        if "Running on public URL:" in line:
+                            gradio_url = line.split("Running on public URL:")[-1].strip()
                             break
-                    if gradio_url:
-                        break
-except:
-    pass
+                # Alternatif format
+                elif "https://" in content:
+                    for line in content.split("\n"):
+                        if "https://" in line and ("gradio.live" in line or "gradio.app" in line):
+                            for word in line.split():
+                                if "https://" in word and ("gradio.live" in word or "gradio.app" in word):
+                                    gradio_url = word.strip().rstrip(".,;")
+                                    break
+                            if gradio_url:
+                                break
+                
+                if gradio_url:
+                    print(f"\n✅ GRADIO PUBLIC URL BULUNDU: {gradio_url}\n")
+                    break
+    except:
+        continue
+
+# Eğer hala bulunamadıysa, log dosyasının son satırlarını göster
+if not gradio_url:
+    try:
+        if os.path.exists(gradio_log):
+            with open(gradio_log, "r") as f:
+                lines = f.readlines()
+                print("\n📋 Gradio log son satırlar:")
+                for line in lines[-10:]:
+                    print(f"   {line.strip()}")
+    except:
+        pass
 
 print("\n" + "=" * 60)
 print("✅ Servisler başlatıldı!")
