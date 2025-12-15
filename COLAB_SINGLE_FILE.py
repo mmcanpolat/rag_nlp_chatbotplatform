@@ -795,7 +795,8 @@ def build_gradio_ui():
                         file_path = str(uploaded_file)
                     
                     file_name = Path(file_path).name
-                    progress_msg = f"📤 Dosya yükleniyor: {file_name}"
+                    file_size = Path(file_path).stat().st_size / (1024 * 1024)  # MB
+                    progress_msg = f"📤 **Dosya yükleniyor:** {file_name} ({file_size:.1f} MB)"
                     progress_update = gr.update(visible=True, value=progress_msg)
                     
                     # Dosyayı upload et
@@ -813,7 +814,7 @@ def build_gradio_ui():
                         if upload_resp.status_code == 200:
                             upload_data = upload_resp.json()["data"]
                             final_data_source = upload_data["filePath"]
-                            progress_msg = "✅ Dosya yüklendi. Embedding başlıyor...\n(Bu işlem dosya boyutuna göre birkaç dakika sürebilir)"
+                            progress_msg = f"✅ **Dosya yüklendi:** {file_name}\n\n🔄 **Embedding başlıyor...**\n📝 Dosya parse ediliyor ve parçalara bölünüyor..."
                             progress_update = gr.update(visible=True, value=progress_msg)
                         else:
                             return f"❌ Dosya yükleme hatası: {upload_resp.json().get('detail', 'Bilinmeyen hata')}", gr.update(visible=False)
@@ -829,6 +830,9 @@ def build_gradio_ui():
             
             try:
                 import requests
+                progress_msg = "🔄 **Agent oluşturuluyor...**\n📊 Veriler işleniyor ve embedding yapılıyor...\n⏳ Bu işlem dosya boyutuna göre birkaç dakika sürebilir."
+                progress_update = gr.update(visible=True, value=progress_msg)
+                
                 resp = requests.post(
                     "http://localhost:3000/api/agents",
                     json={
@@ -841,6 +845,12 @@ def build_gradio_ui():
                     timeout=600  # 10 dakika timeout
                 )
                 if resp.status_code == 200:
+                    data = resp.json()
+                    agent_data = data.get("data", {})
+                    ingestion_info = data.get("ingestion_info", {})
+                    chunks = agent_data.get("chunkCount", ingestion_info.get("chunks", 0))
+                    agent_id = agent_data.get("id", "bilinmiyor")
+                    
                     # Agent listesini güncelle
                     try:
                         agent_resp = requests.get(
@@ -853,7 +863,19 @@ def build_gradio_ui():
                             current_agents = agent_resp.json()["data"]
                     except:
                         pass
-                    return "✅ Agent oluşturuldu! Chat sayfasından kullanabilirsiniz.", gr.update(visible=False)
+                    
+                    success_msg = f"""✅ **Agent başarıyla oluşturuldu!**
+
+📋 **Agent Bilgileri:**
+- **Ad:** {name}
+- **ID:** {agent_id}
+- **Index:** {agent_data.get('indexName', 'N/A')}
+- **İşlenen Parça Sayısı:** {chunks}
+- **Embedding Model:** {embedding_model}
+
+💬 Chat sayfasından agent'ı seçip kullanmaya başlayabilirsiniz!"""
+                    
+                    return success_msg, gr.update(visible=False)
                 else:
                     return f"❌ Hata: {resp.json().get('detail', 'Bilinmeyen hata')}", gr.update(visible=False)
             except requests.exceptions.Timeout:
