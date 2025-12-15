@@ -767,28 +767,35 @@ def build_gradio_ui():
             return history or [], f"Hata: {str(e)}"
     
     def create_agent_fn(name, embedding_model, data_source_type, data_source, uploaded_file, progress_output):
-        if not current_token:
-            return "Önce giriş yapın", gr.update(visible=False)
-        
-        if not name:
-            return "Agent adı gerekli", gr.update(visible=False)
-        
-        # Progress output'u göster
-        progress_msg = "📤 Dosya yükleniyor..."
-        progress_update = gr.update(visible=True, value=progress_msg)
-        
-        # Dosya upload edildiyse önce upload endpoint'ine gönder
-        final_data_source = data_source
+        try:
+            if not current_token:
+                return "Önce giriş yapın", gr.update(visible=False)
+            
+            if not name or not name.strip():
+                return "Agent adı gerekli", gr.update(visible=False)
+            
+            # Progress output'u göster
+            progress_msg = "📤 İşlem başlatılıyor..."
+            progress_update = gr.update(visible=True, value=progress_msg)
+            
+            # Dosya upload edildiyse önce upload endpoint'ine gönder
+            final_data_source = data_source
         
         if uploaded_file is not None:
             try:
                 import requests
-                file_name = Path(uploaded_file).name
+                # Gradio File component bir dict döndürüyor, path'i al
+                if isinstance(uploaded_file, dict):
+                    file_path = uploaded_file.get('name') or uploaded_file.get('path')
+                else:
+                    file_path = str(uploaded_file)
+                
+                file_name = Path(file_path).name
                 progress_msg = f"📤 Dosya yükleniyor: {file_name}"
                 progress_update = gr.update(visible=True, value=progress_msg)
                 
                 # Dosyayı upload et
-                with open(uploaded_file, "rb") as f:
+                with open(file_path, "rb") as f:
                     files = {"file": (file_name, f, "application/octet-stream")}
                     headers = {"Authorization": f"Bearer {current_token}"}
                     
@@ -807,8 +814,10 @@ def build_gradio_ui():
                     else:
                         return f"❌ Dosya yükleme hatası: {upload_resp.json().get('detail', 'Bilinmeyen hata')}", gr.update(visible=False)
             except Exception as e:
+                import traceback
+                print(f"[!] Upload hatası: {traceback.format_exc()}")
                 return f"❌ Dosya yükleme hatası: {str(e)}", gr.update(visible=False)
-        elif not data_source:
+        elif not data_source or not data_source.strip():
             return "URL veya dosya gerekli", gr.update(visible=False)
         else:
             progress_msg = "🔄 Agent oluşturuluyor ve veriler işleniyor...\n(Bu işlem dosya boyutuna göre birkaç dakika sürebilir)"
