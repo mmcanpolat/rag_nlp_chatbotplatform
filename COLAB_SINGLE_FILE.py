@@ -911,9 +911,12 @@ def build_gradio_ui():
                     create_agent_btn = gr.Button("Agent Oluştur", variant="primary")
                     agent_status = gr.Markdown()
                     
+                    # data_source_type için hidden state
+                    agent_source_type_hidden = gr.State(value="file")
+                    
                     create_agent_btn.click(
                         create_agent_fn,
-                        inputs=[agent_name, agent_embedding, gr.update(value="file"), agent_source, agent_file_upload],
+                        inputs=[agent_name, agent_embedding, agent_source_type_hidden, agent_source, agent_file_upload],
                         outputs=[agent_status]
                     )
         
