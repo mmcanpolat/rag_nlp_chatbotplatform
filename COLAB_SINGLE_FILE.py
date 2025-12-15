@@ -1026,10 +1026,11 @@ def build_gradio_ui():
                     # data_source_type için hidden state
                     agent_source_type_hidden = gr.State(value="file")
                     
-                    def agent_click_wrapper(name, embedding_model, data_source_type, data_source, uploaded_file, progress_output):
+                    def agent_click_wrapper(name, embedding_model, data_source_type, data_source, uploaded_file):
                         print(f"[DEBUG] agent_click_wrapper çağrıldı: name={name}, uploaded_file={uploaded_file}")
                         try:
-                            result = create_agent_fn(name, embedding_model, data_source_type, data_source, uploaded_file, progress_output)
+                            # progress_output parametresini kaldırdık, fonksiyon içinde None geçiyoruz
+                            result = create_agent_fn(name, embedding_model, data_source_type, data_source, uploaded_file, None)
                             print(f"[DEBUG] create_agent_fn sonucu: {result}")
                             return result
                         except Exception as e:
@@ -1040,7 +1041,7 @@ def build_gradio_ui():
                     
                     create_agent_btn.click(
                         agent_click_wrapper,
-                        inputs=[agent_name, agent_embedding, agent_source_type_hidden, agent_source, agent_file_upload, agent_progress],
+                        inputs=[agent_name, agent_embedding, agent_source_type_hidden, agent_source, agent_file_upload],
                         outputs=[agent_status, agent_progress],
                         show_progress=True
                     )
