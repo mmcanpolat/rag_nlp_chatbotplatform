@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # RAG engine - soru gelince FAISS'ten ilgili dökümanları bulup modele veriyorum
-# GPT için OpenAI API kullanıyorum, BERT'ler için basit kelime eşleştirmesi yapıyorum
+# GPT için Hugging Face GPT-2 kullanıyorum, BERT'ler için basit kelime eşleştirmesi yapıyorum
 
 import argparse
 import json
@@ -30,7 +30,7 @@ DEFAULT_EMBEDDING = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
 
 class RAGEngine:
     # RAG motoru - soru gelince FAISS'ten context çekip modele veriyorum
-    # GPT için OpenAI API kullanıyorum, BERT modelleri için basit kelime eşleştirmesi yapıyorum
+    # GPT için Hugging Face GPT-2 kullanıyorum, BERT modelleri için basit kelime eşleştirmesi yapıyorum
     
     def __init__(self, index_name: str = "default"):
         self.index_name = index_name
