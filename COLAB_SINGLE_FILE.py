@@ -197,26 +197,76 @@ class DocumentIngestor:
             print(f"[!] Yükleme hatası: {e}")
             return []
     
-    def ingest(self, source: str) -> dict:
+    def ingest(self, source: str, progress_callback=None) -> dict:
         try:
+            if progress_callback:
+                progress_callback("Döküman yükleniyor...", 0, 0)
+            
             docs = self.load_document(source)
             if not docs:
                 return {"success": False, "error": "Döküman yüklenemedi"}
+            
+            if progress_callback:
+                progress_callback(f"Döküman yüklendi ({len(docs)} sayfa)", 0, 0)
+            
+            if progress_callback:
+                progress_callback("Döküman parçalara bölünüyor...", 0, 0)
             
             chunks = self.text_splitter.split_documents(docs)
             if not chunks:
                 return {"success": False, "error": "Döküman bölünemedi"}
             
+            total_chunks = len(chunks)
+            if progress_callback:
+                progress_callback(f"{total_chunks} parça oluşturuldu. Embedding başlıyor...", 0, total_chunks)
+            
             # Mevcut index varsa merge et, yoksa yeni oluştur
             if (self.index_path / "index.faiss").exists():
+                if progress_callback:
+                    progress_callback("Mevcut index yükleniyor...", 0, total_chunks)
                 vectorstore = FAISS.load_local(
                     str(self.index_path),
                     self.embeddings,
                     allow_dangerous_deserialization=True
                 )
-                vectorstore.add_documents(chunks)
+                
+                # Batch'ler halinde ekle (progress için)
+                batch_size = 100
+                for i in range(0, len(chunks), batch_size):
+                    batch = chunks[i:i+batch_size]
+                    vectorstore.add_documents(batch)
+                    batch_num = (i // batch_size) + 1
+                    total_batches = (len(chunks) + batch_size - 1) // batch_size
+                    if progress_callback:
+                        progress_callback(
+                            f"Batch {batch_num}/{total_batches} işleniyor ({len(batch)} parça)...",
+                            i + len(batch),
+                            total_chunks
+                        )
             else:
-                vectorstore = FAISS.from_documents(chunks, self.embeddings)
+                # Yeni index oluştur - batch'ler halinde
+                batch_size = 100
+                first_batch = chunks[:batch_size]
+                if progress_callback:
+                    progress_callback(f"İlk batch oluşturuluyor ({len(first_batch)} parça)...", len(first_batch), total_chunks)
+                
+                vectorstore = FAISS.from_documents(first_batch, self.embeddings)
+                
+                # Kalan batch'leri ekle
+                for i in range(batch_size, len(chunks), batch_size):
+                    batch = chunks[i:i+batch_size]
+                    vectorstore.add_documents(batch)
+                    batch_num = (i // batch_size) + 1
+                    total_batches = (len(chunks) + batch_size - 1) // batch_size
+                    if progress_callback:
+                        progress_callback(
+                            f"Batch {batch_num + 1}/{total_batches} işleniyor ({len(batch)} parça)...",
+                            i + len(batch),
+                            total_chunks
+                        )
+            
+            if progress_callback:
+                progress_callback("Index kaydediliyor...", total_chunks, total_chunks)
             
             vectorstore.save_local(str(self.index_path))
             
@@ -225,11 +275,16 @@ class DocumentIngestor:
                 json.dump({
                     "embedding_model": self.embedding_model_name,
                     "created_at": datetime.now().isoformat(),
-                    "chunk_count": len(chunks)
+                    "chunk_count": total_chunks
                 }, f)
             
-            return {"success": True, "chunks": len(chunks)}
+            if progress_callback:
+                progress_callback(f"✅ Tamamlandı! {total_chunks} parça işlendi.", total_chunks, total_chunks)
+            
+            return {"success": True, "chunks": total_chunks}
         except Exception as e:
+            if progress_callback:
+                progress_callback(f"❌ Hata: {str(e)}", 0, 0)
             return {"success": False, "error": str(e)}
 
 # ==================== RAG ENGINE ====================
@@ -910,14 +965,15 @@ def build_gradio_ui():
                     )
                     create_agent_btn = gr.Button("Agent Oluştur", variant="primary")
                     agent_status = gr.Markdown()
+                    agent_progress = gr.Markdown(visible=False, value="")
                     
                     # data_source_type için hidden state
                     agent_source_type_hidden = gr.State(value="file")
                     
                     create_agent_btn.click(
                         create_agent_fn,
-                        inputs=[agent_name, agent_embedding, agent_source_type_hidden, agent_source, agent_file_upload],
-                        outputs=[agent_status]
+                        inputs=[agent_name, agent_embedding, agent_source_type_hidden, agent_source, agent_file_upload, agent_progress],
+                        outputs=[agent_status, agent_progress]
                     )
         
         with gr.Tab("Şirket Yönetimi", visible=False) as companies_tab:
