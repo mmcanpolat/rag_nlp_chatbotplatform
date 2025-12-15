@@ -859,6 +859,11 @@ def build_gradio_ui():
                 error_detail = traceback.format_exc()
                 print(f"[!] Agent oluşturma hatası: {error_detail}")
                 return f"❌ Hata: {str(e)}", gr.update(visible=False)
+        except Exception as e:
+            import traceback
+            error_detail = traceback.format_exc()
+            print(f"[!] Agent oluşturma genel hatası: {error_detail}")
+            return f"❌ Genel hata: {str(e)}", gr.update(visible=False)
     
     def create_company_fn(name, email):
         if not current_token:
