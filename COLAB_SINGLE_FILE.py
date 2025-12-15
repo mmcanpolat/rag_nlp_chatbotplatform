@@ -908,11 +908,20 @@ def build_gradio_ui():
 - **Ad:** {name}
 - **ID:** `{agent_id}`
 - **Index Adı:** `{index_name}`
-- **Index:** {agent_data.get('indexName', 'N/A')}
 - **İşlenen Parça Sayısı:** {chunks}
-- **Embedding Model:** {embedding_model}
+- **Embedding Model:** `{embedding_model}`
 
-💬 Chat sayfasından agent'ı seçip kullanmaya başlayabilirsiniz!"""
+📁 **Index Konumu:**
+`python_services/data/faiss_index/{index_name}/`
+
+💬 **Kullanım:**
+Chat sayfasından agent'ı seçip sorularınızı sorabilirsiniz!
+
+📊 **Terminal'de görebileceğiniz log'lar:**
+- Dosya parse işlemi
+- Chunk oluşturma
+- Batch'ler halinde embedding (örn: Batch 1/5, Batch 2/5...)
+- Index kaydetme"""
                     
                     return success_msg, gr.update(visible=False)
                 else:
