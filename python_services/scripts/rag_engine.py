@@ -119,31 +119,20 @@ class RAGEngine:
         } for doc, score in results]
     
     def _load_gpt_model(self):
-        # Hugging Face GPT-2 modelini lazy load yapıyorum - ilk kullanımda yükleniyor
+        # Hugging Face Türkçe GPT-2 modelini lazy load yapıyorum - ilk kullanımda yükleniyor
         if self._gpt_model is None:
-            print("[*] Hugging Face GPT-2 modeli yükleniyor...")
+            print("[*] Hugging Face Türkçe GPT-2 modeli yükleniyor...")
             device = 'cuda' if torch.cuda.is_available() else 'cpu'
             # Türkçe GPT-2 modeli kullanıyorum
             model_name = "dbmdz/gpt2-turkish-cased"
-            try:
-                self._gpt_tokenizer = GPT2Tokenizer.from_pretrained(model_name)
-                self._gpt_model = GPT2LMHeadModel.from_pretrained(model_name)
-                self._gpt_model.to(device)
-                self._gpt_model.eval()  # Inference modu
-                # Pad token yoksa eos token kullan
-                if self._gpt_tokenizer.pad_token is None:
-                    self._gpt_tokenizer.pad_token = self._gpt_tokenizer.eos_token
-                print(f"[+] GPT-2 modeli yüklendi ({device})")
-            except Exception as e:
-                print(f"[!] GPT-2 yükleme hatası: {e}")
-                # Fallback: İngilizce GPT-2
-                print("[*] İngilizce GPT-2 deneniyor...")
-                self._gpt_tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-                self._gpt_model = GPT2LMHeadModel.from_pretrained("gpt2")
-                self._gpt_model.to(device)
-                self._gpt_model.eval()
-                if self._gpt_tokenizer.pad_token is None:
-                    self._gpt_tokenizer.pad_token = self._gpt_tokenizer.eos_token
+            self._gpt_tokenizer = GPT2Tokenizer.from_pretrained(model_name)
+            self._gpt_model = GPT2LMHeadModel.from_pretrained(model_name)
+            self._gpt_model.to(device)
+            self._gpt_model.eval()  # Inference modu
+            # Pad token yoksa eos token kullan
+            if self._gpt_tokenizer.pad_token is None:
+                self._gpt_tokenizer.pad_token = self._gpt_tokenizer.eos_token
+            print(f"[+] Türkçe GPT-2 modeli yüklendi ({device})")
     
     def _ask_gpt(self, query: str, contexts: List[str]) -> Tuple[str, float]:
         # Hugging Face GPT-2 modeline soruyorum - context'leri de veriyorum
