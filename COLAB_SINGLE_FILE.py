@@ -767,16 +767,20 @@ def build_gradio_ui():
             return history or [], f"Hata: {str(e)}"
     
     def create_agent_fn(name, embedding_model, data_source_type, data_source, uploaded_file, progress_output):
+        print(f"[DEBUG] create_agent_fn çağrıldı: name={name}, uploaded_file={uploaded_file}")
         try:
             if not current_token:
+                print("[DEBUG] Token yok")
                 return "Önce giriş yapın", gr.update(visible=False)
             
             if not name or not name.strip():
+                print("[DEBUG] Agent adı yok")
                 return "Agent adı gerekli", gr.update(visible=False)
             
             # Progress output'u göster
             progress_msg = "📤 İşlem başlatılıyor..."
             progress_update = gr.update(visible=True, value=progress_msg)
+            print(f"[DEBUG] Progress mesajı: {progress_msg}")
             
             # Dosya upload edildiyse önce upload endpoint'ine gönder
             final_data_source = data_source
