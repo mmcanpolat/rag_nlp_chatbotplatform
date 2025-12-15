@@ -866,7 +866,7 @@ def build_gradio_ui():
             
             try:
                 import requests
-                progress_msg = "🔄 **Agent oluşturuluyor...**\n📊 Veriler işleniyor ve embedding yapılıyor...\n⏳ Bu işlem dosya boyutuna göre birkaç dakika sürebilir."
+                progress_msg = "🔄 **Agent oluşturuluyor...**\n\n📊 **İşlem Adımları:**\n1. Dosya parse ediliyor...\n2. Metin parçalara bölünüyor...\n3. Embedding yapılıyor (bu en uzun süren adım)...\n4. FAISS index oluşturuluyor...\n\n⏳ Bu işlem dosya boyutuna göre birkaç dakika sürebilir.\n📝 Terminal'de detaylı progress log'ları görebilirsiniz."
                 progress_update = gr.update(visible=True, value=progress_msg)
                 
                 resp = requests.post(
