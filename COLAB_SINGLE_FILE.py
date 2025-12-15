@@ -780,8 +780,8 @@ def build_gradio_ui():
             
             # Dosya upload edildiyse önce upload endpoint'ine gönder
             final_data_source = data_source
-        
-        if uploaded_file is not None:
+            
+            if uploaded_file is not None:
             try:
                 import requests
                 # Gradio File component bir dict döndürüyor, path'i al
