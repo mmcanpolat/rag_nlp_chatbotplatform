@@ -4,6 +4,43 @@
 # ============================================
 # Tüm proje bu dosyada - Colab'te tek hücrede çalışır
 # Backend (FastAPI) + Frontend (Gradio) + RAG Engine hepsi burada
+#
+# KULLANIM:
+# 1. Colab'te yeni hücre oluştur
+# 2. Bu dosyanın tüm içeriğini yapıştır
+# 3. Shift+Enter ile çalıştır
+# 4. Public URL terminal çıktısında görünecek
+
+import subprocess
+import sys
+
+# Bağımlılıkları kontrol et ve kur
+print("=" * 60)
+print("RAG SaaS Platform - Tek Dosya Başlatma")
+print("=" * 60)
+print("\n[1/4] Bağımlılıklar kontrol ediliyor...")
+
+required_packages = [
+    "fastapi", "uvicorn", "gradio", "langchain", "langchain-community",
+    "langchain-huggingface", "transformers", "torch", "sentence-transformers",
+    "faiss-cpu", "pypdf", "docx2txt", "beautifulsoup4", "requests"
+]
+
+missing = []
+for pkg in required_packages:
+    try:
+        __import__(pkg.replace("-", "_"))
+    except ImportError:
+        missing.append(pkg)
+
+if missing:
+    print(f"   {len(missing)} paket eksik, kuruluyor...")
+    subprocess.run([sys.executable, "-m", "pip", "install", "-q"] + missing, check=False)
+    print("✅ Bağımlılıklar kuruldu")
+else:
+    print("✅ Tüm bağımlılıklar mevcut")
+
+print("\n[2/4] Modüller yükleniyor...")
 
 import os
 import sys
