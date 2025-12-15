@@ -490,20 +490,23 @@ def build_ui():
 if __name__ == "__main__":
     app = build_ui()
     # Colab'te share=True otomatik public URL oluşturur
-    # Colab ortamını kontrol ediyorum - Colab'te her zaman True
+    # Colab ortamını kontrol ediyorum
     try:
         import google.colab
         is_colab = True
     except:
-        is_colab = os.getenv("COLAB_RELEASE_TAG") is not None
+        is_colab = os.getenv("COLAB_RELEASE_TAG") is not None or "COLAB" in os.environ
     
-    # Colab'te her zaman share=True yap - public URL için
-    # Local'de environment variable ile kontrol edebiliriz
-    force_share = os.getenv("GRADIO_SHARE", "auto")
-    if force_share == "true" or (is_colab and force_share != "false"):
+    # Environment variable kontrolü - GRADIO_SHARE=true ise zorla True
+    force_share = os.getenv("GRADIO_SHARE", "").lower()
+    
+    # Colab'te veya GRADIO_SHARE=true ise share=True
+    if force_share == "true" or is_colab:
         share_value = True
+        print(f"[*] Colab algılandı veya GRADIO_SHARE=true → share=True")
     else:
         share_value = False
+        print(f"[*] Local ortam → share=False")
     
     # Custom CSS - Snow White Theme
     custom_css = """
