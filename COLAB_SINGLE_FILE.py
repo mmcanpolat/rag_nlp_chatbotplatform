@@ -526,24 +526,60 @@ async def create_agent(agent: AgentCreate, user: dict = Depends(require_auth)):
         "createdAt": datetime.now().isoformat()
     }
     
-    # Ingestion yap
+    # Ingestion yap (progress callback ile detaylı log)
+    ingestion_info = {"chunks": 0, "batches": 0, "status": "başlatılıyor"}
     if agent.data_source:
         try:
+            def progress_log(message, current, total):
+                if total > 0:
+                    percent = int((current / total) * 100)
+                    batch_info = ""
+                    if "Batch" in message:
+                        # Batch bilgisini parse et
+                        import re
+                        batch_match = re.search(r'Batch (\d+)/(\d+)', message)
+                        if batch_match:
+                            batch_num = batch_match.group(1)
+                            total_batches = batch_match.group(2)
+                            ingestion_info["batches"] = int(total_batches)
+                            batch_info = f" (Batch {batch_num}/{total_batches})"
+                    print(f"[Ingestion] {message} ({percent}%){batch_info}")
+                    ingestion_info["status"] = message
+                    ingestion_info["chunks"] = current
+                else:
+                    print(f"[Ingestion] {message}")
+                    ingestion_info["status"] = message
+            
+            print(f"[*] Agent oluşturuluyor: {agent.name}")
+            print(f"[*] Veri kaynağı: {agent.data_source}")
+            print(f"[*] Embedding modeli: {agent.embedding_model}")
+            print(f"[*] Index adı: {index_name}")
+            print(f"[*] Ingestion başlıyor...")
+            
             ingestor = DocumentIngestor(index_name=index_name, embedding_model=agent.embedding_model)
-            result = ingestor.ingest(agent.data_source)
+            result = ingestor.ingest(agent.data_source, progress_callback=progress_log)
+            
             if not result.get("success"):
+                print(f"[!] Ingestion başarısız: {result.get('error')}")
                 return JSONResponse(
                     status_code=400,
                     content={"success": False, "error": result.get("error", "Ingestion failed")}
                 )
+            
+            chunks = result.get("chunks", 0)
+            print(f"[+] Ingestion tamamlandı: {chunks} parça işlendi")
+            new_agent["chunkCount"] = chunks
         except Exception as e:
+            import traceback
+            print(f"[!] Ingestion hatası: {traceback.format_exc()}")
             return JSONResponse(
                 status_code=400,
                 content={"success": False, "error": str(e)}
             )
     
     agents[agent_id] = new_agent
-    return {"success": True, "data": new_agent}
+    print(f"[+] Agent oluşturuldu: {agent.name} (ID: {agent_id})")
+    return {"success": True, "data": new_agent, "ingestion_info": ingestion_info}
 
 @backend_app.get("/api/agents")
 async def list_agents(user: dict = Depends(require_auth)):
