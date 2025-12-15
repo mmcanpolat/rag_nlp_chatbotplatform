@@ -27,18 +27,24 @@ print("\n[2/5] Bağımlılıklar kuruluyor (5-10 dakika)...")
 subprocess.run([sys.executable, "-m", "pip", "install", "-q", "-r", "python_services/requirements.txt"], check=True)
 print("✅ Bağımlılıklar kuruldu")
 
-# 3. API Key al
-print("\n[3/5] API Key gerekli...")
+# 3. API Key al - Colab Secrets'tan okuma (zorunlu)
+print("\n[3/5] API Key Colab Secrets'tan okunuyor...")
 try:
     from google.colab import userdata
     OPENAI_API_KEY = userdata.get('OPENAI_API_KEY')
     if not OPENAI_API_KEY:
-        raise KeyError
+        raise ValueError("❌ Colab Secrets'ta 'OPENAI_API_KEY' bulunamadı!\n"
+                        "   Lütfen sol menüden 🔑 Secrets → + Add Secret → 'OPENAI_API_KEY' ekle")
     print("✅ API key Colab Secrets'tan alındı")
-except:
+except ImportError:
+    # Colab dışında çalışıyorsa
+    print("⚠️ Colab ortamı değil, manuel API key isteniyor...")
     OPENAI_API_KEY = getpass("OpenAI API Key girin (görünmez): ")
     if not OPENAI_API_KEY:
-        raise ValueError("API Key gerekli!")
+        raise ValueError("❌ API Key gerekli!")
+except Exception as e:
+    raise ValueError(f"❌ Colab Secrets hatası: {str(e)}\n"
+                     "   Lütfen sol menüden 🔑 Secrets → + Add Secret → 'OPENAI_API_KEY' ekle")
 
 # 4. .env dosyalarını oluştur
 print("\n[4/5] Yapılandırma dosyaları oluşturuluyor...")
