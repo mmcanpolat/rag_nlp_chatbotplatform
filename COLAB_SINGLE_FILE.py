@@ -947,7 +947,7 @@ def run_backend():
     uvicorn.run(backend_app, host="0.0.0.0", port=3000, log_level="error")
 
 def run_frontend():
-    app = build_gradio_ui()
+    app, custom_css = build_gradio_ui()
     is_colab = False
     try:
         import google.colab
