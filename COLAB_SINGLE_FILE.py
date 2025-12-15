@@ -525,12 +525,24 @@ def build_gradio_ui():
     current_agents = []
     
     def login_fn(username, password):
+        if not username or not password:
+            return (
+                "Kullanıcı adı ve şifre gerekli", 
+                gr.update(visible=True),   # Login tab görünür
+                gr.update(visible=False),  # Chat tab gizli
+                gr.update(visible=False),  # Companies tab gizli
+                gr.update(visible=False),  # Agents tab gizli
+                gr.update()                # Agent dropdown boş
+            )
+        
         try:
             import requests
+            # Backend'in hazır olması için kısa bir bekleme
+            time.sleep(1)
             resp = requests.post(
                 "http://localhost:3000/api/auth/login",
                 json={"username": username, "password": password},
-                timeout=5
+                timeout=10
             )
             if resp.status_code == 200:
                 data = resp.json()
@@ -547,23 +559,50 @@ def build_gradio_ui():
                     if agent_resp.status_code == 200:
                         current_agents = agent_resp.json()["data"]
                         agent_choices = [f"{a['name']}" for a in current_agents]
-                        agent_values = [a['id'] for a in current_agents]
                     else:
+                        current_agents = []
                         agent_choices = []
-                        agent_values = []
-                except:
+                except Exception as e:
+                    print(f"[!] Agent listesi alınamadı: {e}")
+                    current_agents = []
                     agent_choices = []
-                    agent_values = []
                 
                 return (
                     f"✅ Giriş başarılı: {current_user.get('username', '')}",
-                    gr.update(visible=True),
-                    gr.update(visible=current_user.get("isSuperAdmin", False)),
+                    gr.update(visible=False),  # Login tab'ı gizle
+                    gr.update(visible=True),   # Chat tab'ı göster
+                    gr.update(visible=current_user.get("isSuperAdmin", False)),  # Companies tab
+                    gr.update(visible=True),   # Agents tab
                     gr.update(choices=agent_choices, value=agent_choices[0] if agent_choices else None)
                 )
-            return "❌ Giriş başarısız", gr.update(visible=False), gr.update(visible=False), gr.update()
+            else:
+                error_msg = resp.json().get("detail", "Giriş başarısız")
+                return (
+                    f"❌ {error_msg}", 
+                    gr.update(visible=True),   # Login tab görünür
+                    gr.update(visible=False),  # Chat tab gizli
+                    gr.update(visible=False),  # Companies tab gizli
+                    gr.update(visible=False),  # Agents tab gizli
+                    gr.update()                # Agent dropdown boş
+                )
+        except requests.exceptions.ConnectionError:
+            return (
+                "❌ Backend'e bağlanılamadı. Lütfen birkaç saniye bekleyip tekrar deneyin.", 
+                gr.update(visible=True),   # Login tab görünür
+                gr.update(visible=False),  # Chat tab gizli
+                gr.update(visible=False),  # Companies tab gizli
+                gr.update(visible=False),  # Agents tab gizli
+                gr.update()                # Agent dropdown boş
+            )
         except Exception as e:
-            return f"❌ Hata: {str(e)}", gr.update(visible=False), gr.update(visible=False), gr.update()
+            return (
+                f"❌ Hata: {str(e)}", 
+                gr.update(visible=True),   # Login tab görünür
+                gr.update(visible=False),  # Chat tab gizli
+                gr.update(visible=False),  # Companies tab gizli
+                gr.update(visible=False),  # Agents tab gizli
+                gr.update()                # Agent dropdown boş
+            )
     
     def chat_fn(message, history, agent_name, model):
         if not current_token:
