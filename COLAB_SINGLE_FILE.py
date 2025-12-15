@@ -947,7 +947,16 @@ def run_backend():
     uvicorn.run(backend_app, host="0.0.0.0", port=3000, log_level="error")
 
 def run_frontend():
-    app, custom_css = build_gradio_ui()
+    result = build_gradio_ui()
+    # Debug: result tipini kontrol et
+    if isinstance(result, tuple):
+        app, custom_css = result
+    else:
+        # Eğer tuple değilse, eski versiyon gibi davran
+        app = result
+        custom_css = ""
+        print("[!] Uyarı: build_gradio_ui() tuple döndürmedi, CSS kullanılamayacak")
+    
     is_colab = False
     try:
         import google.colab
@@ -960,13 +969,21 @@ def run_frontend():
     
     # Gradio 5.0+ için css parametresi launch'a taşındı
     try:
-        app.launch(
-            server_name="0.0.0.0",
-            server_port=7860,
-            share=share_value,
-            show_error=True,
-            css=custom_css
-        )
+        if custom_css:
+            app.launch(
+                server_name="0.0.0.0",
+                server_port=7860,
+                share=share_value,
+                show_error=True,
+                css=custom_css
+            )
+        else:
+            app.launch(
+                server_name="0.0.0.0",
+                server_port=7860,
+                share=share_value,
+                show_error=True
+            )
     except TypeError:
         # Eski Gradio versiyonları için
         try:
