@@ -509,7 +509,14 @@ if __name__ == "__main__":
         share_value = False
         print(f"[*] Local ortam → share=False")
     
-    # DEBUG: Kontrol için
+    # Colab'te kesinlikle share=True yap (güvenlik için tekrar kontrol)
+    try:
+        import google.colab
+        share_value = True
+        print("[*] Colab ortamı tespit edildi → share=True zorlanıyor")
+    except:
+        pass
+    
     print(f"[DEBUG] is_colab={is_colab}, GRADIO_SHARE={force_share}, share_value={share_value}")
     
     # Custom CSS - Snow White Theme
