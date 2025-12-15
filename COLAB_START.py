@@ -29,22 +29,48 @@ print("✅ Bağımlılıklar kuruldu")
 
 # 3. API Key al - Colab Secrets'tan okuma (zorunlu)
 print("\n[3/5] API Key Colab Secrets'tan okunuyor...")
+OPENAI_API_KEY = None
+
 try:
     from google.colab import userdata
+    # Colab Secrets'tan oku
     OPENAI_API_KEY = userdata.get('OPENAI_API_KEY')
-    if not OPENAI_API_KEY:
-        raise ValueError("❌ Colab Secrets'ta 'OPENAI_API_KEY' bulunamadı!\n"
-                        "   Lütfen sol menüden 🔑 Secrets → + Add Secret → 'OPENAI_API_KEY' ekle")
-    print("✅ API key Colab Secrets'tan alındı")
+    if OPENAI_API_KEY:
+        print("✅ API key Colab Secrets'tan alındı")
+    else:
+        # Secrets'ta yoksa hata ver
+        raise ValueError("OPENAI_API_KEY bulunamadı")
 except ImportError:
-    # Colab dışında çalışıyorsa
+    # Colab dışında çalışıyorsa (local test için)
     print("⚠️ Colab ortamı değil, manuel API key isteniyor...")
     OPENAI_API_KEY = getpass("OpenAI API Key girin (görünmez): ")
     if not OPENAI_API_KEY:
         raise ValueError("❌ API Key gerekli!")
+except ValueError as e:
+    # Secrets'ta key yoksa
+    print(f"\n❌ HATA: {str(e)}")
+    print("\n📋 Colab Secrets'a API Key ekleme adımları:")
+    print("   1. Sol menüden 🔑 Secrets sekmesine tıkla")
+    print("   2. + Add Secret butonuna tıkla")
+    print("   3. Name: OPENAI_API_KEY (tam olarak bu isim)")
+    print("   4. Value: OpenAI API key'ini yapıştır")
+    print("   5. Save butonuna tıkla")
+    print("   6. Bu hücreyi tekrar çalıştır\n")
+    raise ValueError("Colab Secrets'ta 'OPENAI_API_KEY' bulunamadı!")
 except Exception as e:
-    raise ValueError(f"❌ Colab Secrets hatası: {str(e)}\n"
-                     "   Lütfen sol menüden 🔑 Secrets → + Add Secret → 'OPENAI_API_KEY' ekle")
+    # Diğer hatalar
+    print(f"\n❌ Colab Secrets hatası: {str(e)}")
+    print("\n📋 Colab Secrets'a API Key ekleme adımları:")
+    print("   1. Sol menüden 🔑 Secrets sekmesine tıkla")
+    print("   2. + Add Secret butonuna tıkla")
+    print("   3. Name: OPENAI_API_KEY (tam olarak bu isim)")
+    print("   4. Value: OpenAI API key'ini yapıştır")
+    print("   5. Save butonuna tıkla\n")
+    raise
+
+# Son kontrol - API key boş olamaz
+if not OPENAI_API_KEY or OPENAI_API_KEY.strip() == "":
+    raise ValueError("❌ API Key boş! Colab Secrets'ta 'OPENAI_API_KEY' eklediğinden emin ol.")
 
 # 4. .env dosyalarını oluştur
 print("\n[4/5] Yapılandırma dosyaları oluşturuluyor...")
