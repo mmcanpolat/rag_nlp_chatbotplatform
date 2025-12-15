@@ -642,47 +642,75 @@ def build_gradio_ui():
         except Exception as e:
             return f"❌ Hata: {str(e)}"
     
-    # Custom CSS - Okunabilir, profesyonel tema
+    # Custom CSS - Koyu tema, profesyonel
     custom_css = """
     .gradio-container {
-        background: #ffffff !important;
+        background: #1a1a1a !important;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
     }
     .gr-button-primary {
-        background: #2563eb !important;
+        background: #3b82f6 !important;
         color: white !important;
         border: none !important;
         font-weight: 500 !important;
     }
     .gr-button-primary:hover {
-        background: #1d4ed8 !important;
+        background: #2563eb !important;
     }
     .gr-button {
-        background: #6b7280 !important;
+        background: #4b5563 !important;
         color: white !important;
         border: none !important;
     }
     .gr-button:hover {
-        background: #4b5563 !important;
+        background: #6b7280 !important;
     }
     .gr-textbox input, .gr-textbox textarea {
-        background: #ffffff !important;
-        color: #111827 !important;
-        border: 1px solid #d1d5db !important;
+        background: #2d2d2d !important;
+        color: #e5e5e5 !important;
+        border: 1px solid #404040 !important;
+    }
+    .gr-textbox input:focus, .gr-textbox textarea:focus {
+        border-color: #3b82f6 !important;
+        outline: none !important;
     }
     .gr-textbox label {
-        color: #374151 !important;
+        color: #d1d5db !important;
         font-weight: 500 !important;
     }
     .gr-markdown {
-        color: #111827 !important;
+        color: #e5e5e5 !important;
+    }
+    .gr-markdown h1, .gr-markdown h2, .gr-markdown h3 {
+        color: #ffffff !important;
     }
     .gr-radio label {
-        color: #374151 !important;
+        color: #d1d5db !important;
     }
     .gr-dropdown {
-        background: #ffffff !important;
-        color: #111827 !important;
+        background: #2d2d2d !important;
+        color: #e5e5e5 !important;
+        border: 1px solid #404040 !important;
+    }
+    .gr-tabs {
+        background: #1a1a1a !important;
+    }
+    .gr-tab {
+        background: #2d2d2d !important;
+        color: #d1d5db !important;
+    }
+    .gr-tab.selected {
+        background: #3b82f6 !important;
+        color: white !important;
+    }
+    .gr-chatbot {
+        background: #2d2d2d !important;
+    }
+    .gr-chatbot .message {
+        color: #e5e5e5 !important;
+    }
+    body {
+        background: #1a1a1a !important;
     }
     """
     
