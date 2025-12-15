@@ -639,9 +639,42 @@ def build_gradio_ui():
         except Exception as e:
             return history or [], f"Hata: {str(e)}"
     
-    def create_agent_fn(name, embedding_model, data_source_type, data_source):
+    def create_agent_fn(name, embedding_model, data_source_type, data_source, uploaded_file):
         if not current_token:
             return "Önce giriş yapın"
+        
+        if not name:
+            return "Agent adı gerekli"
+        
+        # Dosya upload edildiyse önce upload endpoint'ine gönder
+        final_data_source = data_source
+        
+        if uploaded_file is not None:
+            try:
+                import requests
+                # Dosyayı upload et
+                with open(uploaded_file, "rb") as f:
+                    file_name = Path(uploaded_file).name
+                    files = {"file": (file_name, f, "application/octet-stream")}
+                    headers = {"Authorization": f"Bearer {current_token}"}
+                    
+                    upload_resp = requests.post(
+                        "http://localhost:3000/api/upload",
+                        files=files,
+                        headers=headers,
+                        timeout=300
+                    )
+                    
+                    if upload_resp.status_code == 200:
+                        upload_data = upload_resp.json()["data"]
+                        final_data_source = upload_data["filePath"]
+                    else:
+                        return f"❌ Dosya yükleme hatası: {upload_resp.json().get('detail', 'Bilinmeyen hata')}"
+            except Exception as e:
+                return f"❌ Dosya yükleme hatası: {str(e)}"
+        elif not data_source:
+            return "URL veya dosya gerekli"
+        
         try:
             import requests
             resp = requests.post(
@@ -649,11 +682,11 @@ def build_gradio_ui():
                 json={
                     "name": name,
                     "embedding_model": embedding_model,
-                    "data_source_type": data_source_type,
-                    "data_source": data_source
+                    "data_source_type": data_source_type if not uploaded_file else "file",
+                    "data_source": final_data_source
                 },
                 headers={"Authorization": f"Bearer {current_token}"},
-                timeout=120
+                timeout=300
             )
             if resp.status_code == 200:
                 return "✅ Agent oluşturuldu! Chat sayfasından kullanabilirsiniz."
@@ -787,24 +820,28 @@ def build_gradio_ui():
         with gr.Tab("Agent Oluştur", visible=False) as agents_tab:
             with gr.Row():
                 with gr.Column():
-                    agent_name = gr.Textbox(label="Agent Adı")
+                    agent_name = gr.Textbox(label="Agent Adı", placeholder="Örn: Müşteri Destek Botu")
                     agent_embedding = gr.Dropdown(
                         choices=["sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"],
                         value="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
                         label="Embedding Model"
                     )
-                    agent_source_type = gr.Radio(
-                        ["file", "url"],
-                        value="url",
-                        label="Veri Kaynağı Tipi"
+                    gr.Markdown("### Veri Kaynağı")
+                    agent_file_upload = gr.File(
+                        label="Dosya Yükle (PDF, DOCX, TXT, JSON, CSV)",
+                        file_types=[".pdf", ".docx", ".txt", ".json", ".csv"]
                     )
-                    agent_source = gr.Textbox(label="URL veya Dosya Yolu", placeholder="https://example.com veya /path/to/file.pdf")
+                    gr.Markdown("**VEYA**")
+                    agent_source = gr.Textbox(
+                        label="URL veya Dosya Yolu", 
+                        placeholder="https://example.com/article veya /path/to/file.pdf"
+                    )
                     create_agent_btn = gr.Button("Agent Oluştur", variant="primary")
                     agent_status = gr.Markdown()
                     
                     create_agent_btn.click(
                         create_agent_fn,
-                        inputs=[agent_name, agent_embedding, agent_source_type, agent_source],
+                        inputs=[agent_name, agent_embedding, gr.update(value="file"), agent_source, agent_file_upload],
                         outputs=[agent_status]
                     )
         
