@@ -1008,7 +1008,8 @@ def build_gradio_ui():
                     create_agent_btn.click(
                         create_agent_fn,
                         inputs=[agent_name, agent_embedding, agent_source_type_hidden, agent_source, agent_file_upload, agent_progress],
-                        outputs=[agent_status, agent_progress]
+                        outputs=[agent_status, agent_progress],
+                        show_progress=True
                     )
         
         with gr.Tab("Şirket Yönetimi", visible=False) as companies_tab:
