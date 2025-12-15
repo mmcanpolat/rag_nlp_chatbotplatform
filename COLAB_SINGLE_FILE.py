@@ -766,12 +766,16 @@ def build_gradio_ui():
         except Exception as e:
             return history or [], f"Hata: {str(e)}"
     
-    def create_agent_fn(name, embedding_model, data_source_type, data_source, uploaded_file):
+    def create_agent_fn(name, embedding_model, data_source_type, data_source, uploaded_file, progress_output):
         if not current_token:
-            return "Önce giriş yapın"
+            return "Önce giriş yapın", gr.update(visible=False)
         
         if not name:
-            return "Agent adı gerekli"
+            return "Agent adı gerekli", gr.update(visible=False)
+        
+        # Progress output'u göster
+        progress_msg = "📤 Dosya yükleniyor..."
+        progress_update = gr.update(visible=True, value=progress_msg)
         
         # Dosya upload edildiyse önce upload endpoint'ine gönder
         final_data_source = data_source
@@ -779,9 +783,12 @@ def build_gradio_ui():
         if uploaded_file is not None:
             try:
                 import requests
+                file_name = Path(uploaded_file).name
+                progress_msg = f"📤 Dosya yükleniyor: {file_name}"
+                progress_update = gr.update(visible=True, value=progress_msg)
+                
                 # Dosyayı upload et
                 with open(uploaded_file, "rb") as f:
-                    file_name = Path(uploaded_file).name
                     files = {"file": (file_name, f, "application/octet-stream")}
                     headers = {"Authorization": f"Bearer {current_token}"}
                     
@@ -795,12 +802,17 @@ def build_gradio_ui():
                     if upload_resp.status_code == 200:
                         upload_data = upload_resp.json()["data"]
                         final_data_source = upload_data["filePath"]
+                        progress_msg = "✅ Dosya yüklendi. Embedding başlıyor...\n(Bu işlem dosya boyutuna göre birkaç dakika sürebilir)"
+                        progress_update = gr.update(visible=True, value=progress_msg)
                     else:
-                        return f"❌ Dosya yükleme hatası: {upload_resp.json().get('detail', 'Bilinmeyen hata')}"
+                        return f"❌ Dosya yükleme hatası: {upload_resp.json().get('detail', 'Bilinmeyen hata')}", gr.update(visible=False)
             except Exception as e:
-                return f"❌ Dosya yükleme hatası: {str(e)}"
+                return f"❌ Dosya yükleme hatası: {str(e)}", gr.update(visible=False)
         elif not data_source:
-            return "URL veya dosya gerekli"
+            return "URL veya dosya gerekli", gr.update(visible=False)
+        else:
+            progress_msg = "🔄 Agent oluşturuluyor ve veriler işleniyor...\n(Bu işlem dosya boyutuna göre birkaç dakika sürebilir)"
+            progress_update = gr.update(visible=True, value=progress_msg)
         
         try:
             import requests
@@ -813,14 +825,28 @@ def build_gradio_ui():
                     "data_source": final_data_source
                 },
                 headers={"Authorization": f"Bearer {current_token}"},
-                timeout=300
+                timeout=600  # 10 dakika timeout
             )
             if resp.status_code == 200:
-                return "✅ Agent oluşturuldu! Chat sayfasından kullanabilirsiniz."
+                # Agent listesini güncelle
+                try:
+                    agent_resp = requests.get(
+                        "http://localhost:3000/api/agents",
+                        headers={"Authorization": f"Bearer {current_token}"},
+                        timeout=5
+                    )
+                    if agent_resp.status_code == 200:
+                        nonlocal current_agents
+                        current_agents = agent_resp.json()["data"]
+                except:
+                    pass
+                return "✅ Agent oluşturuldu! Chat sayfasından kullanabilirsiniz.", gr.update(visible=False)
             else:
-                return f"❌ Hata: {resp.json().get('detail', 'Bilinmeyen hata')}"
+                return f"❌ Hata: {resp.json().get('detail', 'Bilinmeyen hata')}", gr.update(visible=False)
+        except requests.exceptions.Timeout:
+            return "❌ İşlem zaman aşımına uğradı. Dosya çok büyük olabilir.", gr.update(visible=False)
         except Exception as e:
-            return f"❌ Hata: {str(e)}"
+            return f"❌ Hata: {str(e)}", gr.update(visible=False)
     
     def create_company_fn(name, email):
         if not current_token:
