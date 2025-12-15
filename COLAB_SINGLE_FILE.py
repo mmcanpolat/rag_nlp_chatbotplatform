@@ -951,7 +951,16 @@ def build_gradio_ui():
     }
     """
     
-    with gr.Blocks(title="RAG SaaS Platform") as app:
+    # CSS'i Blocks constructor'a ekle (Gradio versiyonuna göre)
+    try:
+        # Yeni versiyonlar için css parametresi Blocks'ta
+        app = gr.Blocks(title="RAG SaaS Platform", css=custom_css)
+    except TypeError:
+        # Eski versiyonlar için css yok
+        app = gr.Blocks(title="RAG SaaS Platform")
+    
+    # UI'ı oluştur
+    with app:
         gr.Markdown("# RAG SaaS Platform")
         
         with gr.Tab("Giriş", visible=True) as login_tab:
