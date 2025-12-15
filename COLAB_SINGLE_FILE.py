@@ -958,21 +958,31 @@ def run_frontend():
     share_value = is_colab or os.getenv("GRADIO_SHARE", "").lower() == "true"
     print(f"\n[*] Gradio başlatılıyor (share={share_value})...")
     
-    # Gradio 5.0+ için theme ve css parametreleri launch'a taşındı
+    # Gradio 5.0+ için css parametresi launch'a taşındı
     try:
         app.launch(
             server_name="0.0.0.0",
             server_port=7860,
             share=share_value,
-            show_error=True
+            show_error=True,
+            css=custom_css
         )
     except TypeError:
         # Eski Gradio versiyonları için
-        app.launch(
-            server_name="0.0.0.0",
-            server_port=7860,
-            share=share_value
-        )
+        try:
+            app.launch(
+                server_name="0.0.0.0",
+                server_port=7860,
+                share=share_value,
+                css=custom_css
+            )
+        except TypeError:
+            # CSS desteklenmiyorsa
+            app.launch(
+                server_name="0.0.0.0",
+                server_port=7860,
+                share=share_value
+            )
 
 if __name__ == "__main__":
     print("\n[4/5] Backend başlatılıyor...")
