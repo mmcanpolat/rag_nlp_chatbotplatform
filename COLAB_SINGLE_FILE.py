@@ -642,25 +642,54 @@ def build_gradio_ui():
         except Exception as e:
             return f"❌ Hata: {str(e)}"
     
-    # Custom CSS - Snow White Theme
+    # Custom CSS - Okunabilir, profesyonel tema
     custom_css = """
     .gradio-container {
-        background: #fafafa !important;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #ffffff !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    }
+    .gr-button-primary {
+        background: #2563eb !important;
+        color: white !important;
+        border: none !important;
+        font-weight: 500 !important;
+    }
+    .gr-button-primary:hover {
+        background: #1d4ed8 !important;
     }
     .gr-button {
-        background: #2c3e50 !important;
+        background: #6b7280 !important;
         color: white !important;
+        border: none !important;
     }
     .gr-button:hover {
-        background: #34495e !important;
+        background: #4b5563 !important;
+    }
+    .gr-textbox input, .gr-textbox textarea {
+        background: #ffffff !important;
+        color: #111827 !important;
+        border: 1px solid #d1d5db !important;
+    }
+    .gr-textbox label {
+        color: #374151 !important;
+        font-weight: 500 !important;
+    }
+    .gr-markdown {
+        color: #111827 !important;
+    }
+    .gr-radio label {
+        color: #374151 !important;
+    }
+    .gr-dropdown {
+        background: #ffffff !important;
+        color: #111827 !important;
     }
     """
     
     with gr.Blocks(title="RAG SaaS Platform", css=custom_css) as app:
         gr.Markdown("# RAG SaaS Platform")
         
-        with gr.Tab("Giriş"):
+        with gr.Tab("Giriş", visible=True) as login_tab:
             with gr.Row():
                 with gr.Column():
                     login_user = gr.Textbox(label="Kullanıcı Adı", value="admin@ragplatform.com")
@@ -729,11 +758,7 @@ def build_gradio_ui():
         login_btn.click(
             login_fn,
             inputs=[login_user, login_pass],
-            outputs=[login_status, chat_tab, companies_tab, agent_dropdown]
-        )
-        login_btn.click(
-            lambda: gr.update(visible=True),
-            outputs=[agents_tab]
+            outputs=[login_status, login_tab, chat_tab, companies_tab, agents_tab, agent_dropdown]
         )
     
     return app
