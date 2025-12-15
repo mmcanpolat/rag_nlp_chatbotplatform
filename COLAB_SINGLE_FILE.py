@@ -26,15 +26,23 @@ print("\n[1/5] Bağımlılıklar kontrol ediliyor...")
 
 required_packages = [
     "fastapi", "uvicorn[standard]", "gradio>=4.0.0", "langchain", "langchain-community",
-    "langchain-huggingface", "langchain-text-splitters", "transformers", "torch", 
-    "sentence-transformers", "faiss-cpu", "pypdf", "docx2txt", "beautifulsoup4", 
+    "langchain-huggingface", "langchain-text-splitters", "langchain-core", "transformers", 
+    "torch", "sentence-transformers", "faiss-cpu", "pypdf", "docx2txt", "beautifulsoup4", 
     "requests", "python-dotenv"
 ]
 
 missing = []
 for pkg in required_packages:
     try:
-        pkg_import = pkg.split("[")[0].split(">=")[0].replace("-", "_")
+        # Paket adını import adına çevir
+        pkg_clean = pkg.split("[")[0].split(">=")[0]
+        # Özel durumlar
+        if pkg_clean == "langchain-text-splitters":
+            pkg_import = "langchain_text_splitters"
+        elif pkg_clean == "langchain-core":
+            pkg_import = "langchain_core"
+        else:
+            pkg_import = pkg_clean.replace("-", "_")
         __import__(pkg_import)
     except ImportError:
         missing.append(pkg)
@@ -73,11 +81,21 @@ from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders import (
     PyPDFLoader, WebBaseLoader, Docx2txtLoader, TextLoader, JSONLoader, CSVLoader
 )
+# LangChain text splitter - yeni versiyonlarda ayrı pakette
 try:
     from langchain_text_splitters import RecursiveCharacterTextSplitter
 except ImportError:
-    from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_core.documents import Document
+    try:
+        from langchain.text_splitter import RecursiveCharacterTextSplitter
+    except ImportError:
+        # En son çare: langchain paketinden
+        from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+# Document - yeni versiyonlarda langchain_core'da
+try:
+    from langchain_core.documents import Document
+except ImportError:
+    from langchain.schema import Document
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 import torch
 
