@@ -15,14 +15,11 @@
 # 2. Shift+Enter ile çalıştır
 # 3. Public URL terminal çıktısında görünecek
 
-import subprocess
-import sys
-
-# Bağımlılıkları kontrol et ve kur
+# Bağımlılıkları kontrol et (kurulum yapma, sadece kontrol)
 print("=" * 60)
 print("RAG SaaS Platform - Tek Dosya Başlatma")
 print("=" * 60)
-print("\n[1/5] Bağımlılıklar kontrol ediliyor...")
+print("\n[1/4] Bağımlılıklar kontrol ediliyor...")
 
 required_packages = [
     "fastapi", "uvicorn[standard]", "gradio>=4.0.0", "langchain", "langchain-community",
@@ -48,13 +45,14 @@ for pkg in required_packages:
         missing.append(pkg)
 
 if missing:
-    print(f"   {len(missing)} paket eksik, kuruluyor (5-10 dakika)...")
-    subprocess.run([sys.executable, "-m", "pip", "install", "-q", "--upgrade"] + missing, check=False)
-    print("✅ Bağımlılıklar kuruldu")
+    print(f"❌ {len(missing)} paket eksik!")
+    print("Lütfen önce COLAB_INSTALL.py dosyasını çalıştırın:")
+    print("  !wget -q -O - https://raw.githubusercontent.com/mmcanpolat/rag_nlp_chatbotplatform/main/COLAB_INSTALL.py | python3")
+    sys.exit(1)
 else:
     print("✅ Tüm bağımlılıklar mevcut")
 
-print("\n[2/5] Modüller yükleniyor...")
+print("\n[2/4] Modüller yükleniyor...")
 
 import os
 import json
@@ -866,7 +864,7 @@ def build_gradio_ui():
             
             try:
                 import requests
-                progress_msg = "🔄 **Agent oluşturuluyor...**\n\n📊 **İşlem Adımları:**\n1. Dosya parse ediliyor...\n2. Metin parçalara bölünüyor...\n3. Embedding yapılıyor (bu en uzun süren adım)...\n4. FAISS index oluşturuluyor...\n\n⏳ Bu işlem dosya boyutuna göre birkaç dakika sürebilir.\n📝 Terminal'de detaylı progress log'ları görebilirsiniz."
+                progress_msg = "🔄 **Agent oluşturuluyor...**\n\n📊 **İşlem Adımları:**\n1. Dosya parse ediliyor...\n2. Metin parçalara bölünüyor...\n3. Embedding yapılıyor (bu en uzun süren adım)...\n   - Batch'ler halinde işleniyor\n   - Her batch'te progress terminal'de görünecek\n4. FAISS index oluşturuluyor...\n\n⏳ Bu işlem dosya boyutuna göre birkaç dakika sürebilir.\n📝 Terminal'de detaylı progress log'ları görebilirsiniz (Batch X/Y, %Yüzde)."
                 progress_update = gr.update(visible=True, value=progress_msg)
                 
                 resp = requests.post(
@@ -923,7 +921,12 @@ Chat sayfasından agent'ı seçip sorularınızı sorabilirsiniz!
 - Batch'ler halinde embedding (örn: Batch 1/5, Batch 2/5...)
 - Index kaydetme"""
                     
-                    return success_msg, gr.update(visible=False)
+                    # Agent dropdown'ını güncelle
+                    return (
+                        success_msg, 
+                        gr.update(visible=False),
+                        gr.update(choices=agent_choices_updated, value=agent_choices_updated[0] if agent_choices_updated else None)
+                    )
                 else:
                     return f"❌ Hata: {resp.json().get('detail', 'Bilinmeyen hata')}", gr.update(visible=False)
             except requests.exceptions.Timeout:
@@ -1054,7 +1057,15 @@ Chat sayfasından agent'ı seçip sorularınızı sorabilirsiniz!
             with gr.Row():
                 with gr.Column():
                     agent_dropdown = gr.Dropdown(choices=[], label="Agent Seç", interactive=True)
-                    model_radio = gr.Radio(["GPT", "BERT-CASED", "BERT-SENTIMENT"], value="GPT", label="Model")
+                    model_radio = gr.Radio(
+                        [
+                            "dbmdz/gpt2-turkish-cased (GPT-2 Türkçe)",
+                            "bert-base-turkish-cased (BERT Türkçe)",
+                            "savasy/bert-base-turkish-sentiment-cased (BERT Sentiment)"
+                        ],
+                        value="dbmdz/gpt2-turkish-cased (GPT-2 Türkçe)",
+                        label="Model"
+                    )
                     chatbot = gr.Chatbot(label="Chat", height=500, type="messages", allow_tags=False)
                     msg_input = gr.Textbox(label="Mesaj", placeholder="Sorunuzu yazın...")
                     send_btn = gr.Button("Gönder", variant="primary")
@@ -1180,7 +1191,7 @@ def run_frontend():
         )
 
 if __name__ == "__main__":
-    print("\n[4/5] Backend başlatılıyor...")
+    print("\n[4/4] Backend başlatılıyor...")
     backend_thread = threading.Thread(target=run_backend, daemon=True)
     backend_thread.start()
     time.sleep(5)  # Backend'in başlaması için bekle
