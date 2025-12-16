@@ -398,9 +398,22 @@ class SimpleRAGEngine:
         if self._gpt_model is None:
             print("[*] Türkçe GPT-2 yükleniyor...")
             device = 'cuda' if torch.cuda.is_available() else 'cpu'
-            model_name = "dbmdz/gpt2-turkish-cased"
-            self._gpt_tokenizer = GPT2Tokenizer.from_pretrained(model_name)
-            self._gpt_model = GPT2LMHeadModel.from_pretrained(model_name)
+            # Model adını düzelt - doğru Hugging Face model adı
+            model_name = "dbmdz/bert-base-turkish-cased"  # Bu BERT, GPT-2 için alternatif kullanacağız
+            # GPT-2 Türkçe modeli yoksa, İngilizce GPT-2 kullan veya basit bir fallback
+            try:
+                # Önce Türkçe GPT-2'yi dene
+                gpt2_turkish = "dbmdz/gpt2-turkish-cased"
+                self._gpt_tokenizer = GPT2Tokenizer.from_pretrained(gpt2_turkish)
+                self._gpt_model = GPT2LMHeadModel.from_pretrained(gpt2_turkish)
+            except Exception as e:
+                print(f"[!] Türkçe GPT-2 yüklenemedi: {e}")
+                print("[*] İngilizce GPT-2 kullanılıyor (fallback)...")
+                # Fallback: İngilizce GPT-2
+                model_name = "gpt2"
+                self._gpt_tokenizer = GPT2Tokenizer.from_pretrained(model_name)
+                self._gpt_model = GPT2LMHeadModel.from_pretrained(model_name)
+            
             self._gpt_model.to(device)
             self._gpt_model.eval()
             if self._gpt_tokenizer.pad_token is None:
@@ -1226,11 +1239,11 @@ Chat sayfasından agent'ı seçip sorularınızı sorabilirsiniz!
                     agent_dropdown = gr.Dropdown(choices=[], label="Agent Seç", interactive=True)
                     model_radio = gr.Radio(
                         [
-                            "dbmdz/gpt2-turkish-cased (GPT-2 Türkçe)",
+                            "gpt2 (GPT-2 İngilizce)",
                             "bert-base-turkish-cased (BERT Türkçe)",
                             "savasy/bert-base-turkish-sentiment-cased (BERT Sentiment)"
                         ],
-                        value="dbmdz/gpt2-turkish-cased (GPT-2 Türkçe)",
+                        value="gpt2 (GPT-2 İngilizce)",
                         label="Model"
                     )
                     chatbot = gr.Chatbot(label="Chat", height=500, type="messages", allow_tags=False)
