@@ -36,7 +36,7 @@ for pkg in required_packages:
     try:
         # Paket adını import adına çevir
         pkg_clean = pkg.split("[")[0].split(">=")[0]
-        # Özel durumlar
+        # Özel durumlar - import adları
         if pkg_clean == "langchain-text-splitters":
             pkg_import = "langchain_text_splitters"
         elif pkg_clean == "langchain-core":
@@ -49,6 +49,10 @@ for pkg in required_packages:
             pkg_import = "sentence_transformers"
         elif pkg_clean == "python-dotenv":
             pkg_import = "dotenv"
+        elif pkg_clean == "faiss-cpu":
+            pkg_import = "faiss"
+        elif pkg_clean == "beautifulsoup4":
+            pkg_import = "bs4"
         else:
             pkg_import = pkg_clean.replace("-", "_")
         __import__(pkg_import)
@@ -86,6 +90,10 @@ if missing:
                     pkg_import = "sentence_transformers"
                 elif pkg_clean == "python-dotenv":
                     pkg_import = "dotenv"
+                elif pkg_clean == "faiss-cpu":
+                    pkg_import = "faiss"
+                elif pkg_clean == "beautifulsoup4":
+                    pkg_import = "bs4"
                 else:
                     pkg_import = pkg_clean.replace("-", "_")
                 __import__(pkg_import)
