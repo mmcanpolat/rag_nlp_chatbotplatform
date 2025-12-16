@@ -935,7 +935,11 @@ Chat sayfasından agent'ı seçip sorularınızı sorabilirsiniz!
                 import traceback
                 error_detail = traceback.format_exc()
                 print(f"[!] Agent oluşturma hatası: {error_detail}")
-                return f"❌ Hata: {str(e)}", gr.update(visible=False)
+                return (
+                    f"❌ Hata: {str(e)}", 
+                    gr.update(visible=False),
+                    gr.update()  # Agent dropdown değişmez
+                )
         except Exception as e:
             import traceback
             error_detail = traceback.format_exc()
@@ -1110,7 +1114,7 @@ Chat sayfasından agent'ı seçip sorularınızı sorabilirsiniz!
                     def agent_click_wrapper(name, embedding_model, data_source_type, data_source, uploaded_file):
                         print(f"[DEBUG] agent_click_wrapper çağrıldı: name={name}, uploaded_file={uploaded_file}")
                         try:
-                            # progress_output parametresini kaldırdık, fonksiyon içinde None geçiyoruz
+                            # create_agent_fn artık 3 değer döndürüyor: (status_msg, progress_update, agent_dropdown_update)
                             result = create_agent_fn(name, embedding_model, data_source_type, data_source, uploaded_file, None)
                             print(f"[DEBUG] create_agent_fn sonucu: {result}")
                             return result
