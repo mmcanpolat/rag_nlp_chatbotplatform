@@ -995,82 +995,6 @@ def build_gradio_ui():
     }
     """
     
-    def login_fn(username, password):
-        if not username or not password:
-            return (
-                "Kullanıcı adı ve şifre gerekli", 
-                gr.update(visible=True),   # Login tab görünür
-                gr.update(visible=False),  # Chat tab gizli
-                gr.update(visible=False),  # Companies tab gizli
-                gr.update(visible=False),  # Agents tab gizli
-                gr.update()                # Agent dropdown boş
-            )
-        
-        try:
-            import requests
-            # Backend'in hazır olması için kısa bir bekleme
-            time.sleep(1)
-            resp = requests.post(
-                "http://localhost:3000/api/auth/login",
-                json={"username": username, "password": password},
-                timeout=10
-            )
-            if resp.status_code == 200:
-                data = resp.json()
-                nonlocal current_user, current_token, current_agents
-                current_user = data["data"]
-                current_token = data["token"]
-                # Agent listesini güncelle
-                try:
-                    agent_resp = requests.get(
-                        "http://localhost:3000/api/agents",
-                        headers={"Authorization": f"Bearer {current_token}"},
-                        timeout=5
-                    )
-                    if agent_resp.status_code == 200:
-                        current_agents = agent_resp.json()["data"]
-                        agent_choices = [f"{a['name']}" for a in current_agents]
-                    else:
-                        current_agents = []
-                        agent_choices = []
-                except Exception as e:
-                    print(f"[!] Agent listesi alınamadı: {e}")
-                    current_agents = []
-                    agent_choices = []
-                
-                return (
-                    f"✅ Giriş başarılı: {current_user.get('username', '')}",
-                    gr.update(visible=False),  # Login tab'ı gizle
-                    gr.update(visible=True),   # Chat tab'ı göster
-                    gr.update(visible=current_user.get("isSuperAdmin", False)),  # Companies tab
-                    gr.update(visible=True)    # Analytics tab
-                )
-            else:
-                error_msg = resp.json().get("detail", "Giriş başarısız")
-                return (
-                    f"❌ {error_msg}", 
-                    gr.update(visible=True),   # Login tab görünür
-                    gr.update(visible=False),  # Chat tab gizli
-                    gr.update(visible=False),  # Companies tab gizli
-                    gr.update(visible=False)   # Analytics tab gizli
-                )
-        except requests.exceptions.ConnectionError:
-            return (
-                "❌ Backend'e bağlanılamadı. Lütfen birkaç saniye bekleyip tekrar deneyin.", 
-                gr.update(visible=True),   # Login tab görünür
-                gr.update(visible=False),  # Chat tab gizli
-                gr.update(visible=False),  # Companies tab gizli
-                gr.update(visible=False)   # Analytics tab gizli
-            )
-        except Exception as e:
-            return (
-                f"❌ Hata: {str(e)}", 
-                gr.update(visible=True),   # Login tab görünür
-                gr.update(visible=False),  # Chat tab gizli
-                gr.update(visible=False),  # Companies tab gizli
-                gr.update(visible=False)   # Analytics tab gizli
-            )
-    
     def get_model_key(model_name):
         """Model adından kısa key çıkar"""
         if "gpt2-turkish" in model_name.lower() or "gpt-2" in model_name.lower() or "gpt2" in model_name.lower():
@@ -1325,25 +1249,6 @@ Chat sayfasından agent'ı seçip sorularınızı sorabilirsiniz!
                 gr.update(visible=False),
                 gr.update()  # Agent dropdown değişmez
             )
-    
-    def create_company_fn(name, email):
-        if not current_token:
-            return "Önce giriş yapın"
-        try:
-            import requests
-            resp = requests.post(
-                "http://localhost:3000/api/admin/companies",
-                json={"name": name, "email": email},
-                headers={"Authorization": f"Bearer {current_token}"},
-                timeout=10
-            )
-            if resp.status_code == 200:
-                data = resp.json()["data"]
-                return f"✅ Şirket oluşturuldu!\nKullanıcı: {data['username']}\nŞifre: {data['password']}"
-            else:
-                return f"❌ Hata: {resp.json().get('detail', 'Bilinmeyen hata')}"
-        except Exception as e:
-            return f"❌ Hata: {str(e)}"
     
     # Custom CSS - Koyu tema, profesyonel
     custom_css = """
