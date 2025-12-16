@@ -270,10 +270,19 @@ class DocumentIngestor:
             if progress_callback:
                 progress_callback(f"Döküman yüklendi ({len(docs)} sayfa)", 0, 0)
             
-            if progress_callback:
-                progress_callback("Döküman parçalara bölünüyor...", 0, 0)
+            # CSV dosyaları için: Her satırı direkt chunk yap (text splitter kullanma)
+            source_type = self.detect_source_type(source)
+            if source_type == 'csv':
+                if progress_callback:
+                    progress_callback(f"CSV satırları direkt embed edilecek ({len(docs)} satır)...", 0, 0)
+                # CSV için: Her Document (satır) direkt bir chunk
+                chunks = docs  # Text splitter kullanmadan direkt kullan
+            else:
+                # Diğer dosya tipleri için text splitter kullan
+                if progress_callback:
+                    progress_callback("Döküman parçalara bölünüyor...", 0, 0)
+                chunks = self.text_splitter.split_documents(docs)
             
-            chunks = self.text_splitter.split_documents(docs)
             if not chunks:
                 return {"success": False, "error": "Döküman bölünemedi"}
             
