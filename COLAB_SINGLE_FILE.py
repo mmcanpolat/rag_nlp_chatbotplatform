@@ -1239,11 +1239,11 @@ Chat sayfasından agent'ı seçip sorularınızı sorabilirsiniz!
                     agent_dropdown = gr.Dropdown(choices=[], label="Agent Seç", interactive=True)
                     model_radio = gr.Radio(
                         [
-                            "gpt2 (GPT-2 İngilizce)",
+                            "dbmdz/gpt2-turkish (GPT-2 Türkçe)",
                             "bert-base-turkish-cased (BERT Türkçe)",
                             "savasy/bert-base-turkish-sentiment-cased (BERT Sentiment)"
                         ],
-                        value="gpt2 (GPT-2 İngilizce)",
+                        value="dbmdz/gpt2-turkish (GPT-2 Türkçe)",
                         label="Model"
                     )
                     chatbot = gr.Chatbot(label="Chat", height=500, type="messages", allow_tags=False)
