@@ -785,11 +785,20 @@ def build_gradio_ui():
         if not agent_id:
             return history or [], "Agent bulunamadı"
         
+        # Model adını parse et (tam model adından kısa adı çıkar)
+        model_short = "GPT"
+        if "gpt2-turkish" in model.lower() or "gpt-2" in model.lower() or "gpt2" in model.lower():
+            model_short = "GPT"
+        elif "bert-base-turkish" in model.lower() and "sentiment" not in model.lower():
+            model_short = "BERT-CASED"
+        elif "sentiment" in model.lower():
+            model_short = "BERT-SENTIMENT"
+        
         try:
             import requests
             resp = requests.post(
                 "http://localhost:3000/api/chat",
-                json={"agent_id": agent_id, "query": message, "model": model},
+                json={"agent_id": agent_id, "query": message, "model": model_short},
                 headers={"Authorization": f"Bearer {current_token}"},
                 timeout=60
             )
