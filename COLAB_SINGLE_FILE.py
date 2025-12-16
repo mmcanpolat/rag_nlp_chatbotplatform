@@ -1317,13 +1317,53 @@ def run_frontend():
         )
 
 if __name__ == "__main__":
-    print("\n[4/4] Backend başlatılıyor...")
+    # Sabit CSV dosyasını yükle ve embed et
+    print("\n[4/6] Sabit CSV dosyası yükleniyor ve embed ediliyor...")
+    FIXED_CSV_PATH = "/content/sample_data/test_cleaned.csv"
+    
+    # Colab'te dosya yoksa, local'de test için alternatif yol
+    if not os.path.exists(FIXED_CSV_PATH):
+        # Local test için
+        FIXED_CSV_PATH = str(BASE_DIR / "python_services" / "data" / "test_cleaned.csv")
+        if not os.path.exists(FIXED_CSV_PATH):
+            print(f"[!] CSV dosyası bulunamadı: {FIXED_CSV_PATH}")
+            print("[!] Lütfen dosyayı bu konuma yerleştirin veya Colab'te /content/sample_data/test_cleaned.csv konumuna koyun")
+            FIXED_CSV_PATH = None
+    
+    if FIXED_CSV_PATH and os.path.exists(FIXED_CSV_PATH):
+        try:
+            print(f"[*] CSV dosyası bulundu: {FIXED_CSV_PATH}")
+            print("[*] Embedding başlatılıyor...")
+            ingestor = DocumentIngestor(index_name="default", embedding_model="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
+            
+            def progress_callback(msg, current, total):
+                if total > 0:
+                    pct = (current / total) * 100
+                    print(f"[Embedding] {msg} ({current}/{total} - %{pct:.1f})")
+                else:
+                    print(f"[Embedding] {msg}")
+            
+            result = ingestor.ingest(FIXED_CSV_PATH, progress_callback=progress_callback)
+            if result.get("success"):
+                chunks = result.get("chunks", 0)
+                print(f"✅ CSV başarıyla yüklendi ve embed edildi: {chunks} satır")
+                print(f"✅ Index kaydedildi: {INDEX_DIR / 'default'}")
+            else:
+                print(f"[!] CSV yükleme hatası: {result.get('error')}")
+        except Exception as e:
+            import traceback
+            print(f"[!] CSV yükleme hatası: {traceback.format_exc()}")
+    else:
+        print("[!] CSV dosyası bulunamadı, manuel yükleme gerekebilir")
+        print("[!] Index yoksa chat çalışmayacak!")
+    
+    print("\n[5/6] Backend başlatılıyor...")
     backend_thread = threading.Thread(target=run_backend, daemon=True)
     backend_thread.start()
     time.sleep(5)  # Backend'in başlaması için bekle
     print("✅ Backend: http://localhost:3000")
     
-    print("\n[5/5] Frontend başlatılıyor...")
+    print("\n[6/6] Frontend başlatılıyor...")
     print("\n" + "=" * 60)
     print("🚀 RAG Platform hazır!")
     print("=" * 60)
