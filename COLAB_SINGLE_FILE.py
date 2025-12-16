@@ -1070,7 +1070,6 @@ def build_gradio_ui():
         history = model_chat_histories.get(model_key, [])
         return history
     
-    def create_agent_fn(name, embedding_model, data_source_type, data_source, uploaded_file, progress_output):
         print(f"[DEBUG] create_agent_fn çağrıldı: name={name}, uploaded_file={uploaded_file}")
         try:
             if not current_token:
