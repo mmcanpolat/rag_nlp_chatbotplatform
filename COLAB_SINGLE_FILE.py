@@ -517,7 +517,7 @@ CEVAP:"""
         
         if not contexts:
             return {
-                "answer": "Önce veri yükleyin. Agent oluştururken dosya veya URL ekleyin.",
+                "answer": "Veri yükleniyor veya index bulunamadı. Lütfen birkaç saniye bekleyip tekrar deneyin.",
                 "context": "",
                 "confidence": 0.0,
                 "model_used": "GPT",
@@ -872,8 +872,6 @@ async def chat(req: ChatRequest):
         # Eğer agent_id varsa ve geçerliyse onu kullan, yoksa default kullan
         if req.agent_id and req.agent_id in agents:
             agent = agents[req.agent_id]
-            if not user.get("isSuperAdmin") and agent.get("companyId") != user.get("companyId"):
-                raise HTTPException(status_code=403, detail="Unauthorized")
             index_name = agent.get("indexName", f"agent_{req.agent_id}")
         
         # RAG engine'i oluştur ve sorguyu çalıştır
@@ -1088,9 +1086,6 @@ def build_gradio_ui():
         if not message or not message.strip():
             return history or [], ""
         
-        if not current_token:
-            return history or [], "Önce giriş yapın"
-        
         # Model key'ini al
         model_key = get_model_key(model)
         
@@ -1111,7 +1106,6 @@ def build_gradio_ui():
             resp = requests.post(
                 "http://localhost:3000/api/chat",
                 json={"agent_id": "default", "query": message, "model": model_key},
-                headers={"Authorization": f"Bearer {current_token}"},
                 timeout=60
             )
             if resp.status_code == 200:
@@ -1553,25 +1547,6 @@ Chat sayfasından agent'ı seçip sorularınızı sorabilirsiniz!
                         outputs=[metrics_output, metrics_plot]
                     )
         
-        with gr.Tab("Şirket Yönetimi", visible=False) as companies_tab:
-            with gr.Row():
-                with gr.Column():
-                    comp_name = gr.Textbox(label="Şirket Adı")
-                    comp_email = gr.Textbox(label="Email (opsiyonel)")
-                    create_comp_btn = gr.Button("Şirket Oluştur", variant="primary")
-                    comp_status = gr.Markdown()
-                    
-                    create_comp_btn.click(
-                        create_company_fn,
-                        inputs=[comp_name, comp_email],
-                        outputs=[comp_status]
-                    )
-        
-        login_btn.click(
-            login_fn,
-            inputs=[login_user, login_pass],
-            outputs=[login_status, login_tab, chat_tab, companies_tab, analytics_tab]
-        )
     
     return app, custom_css
 
