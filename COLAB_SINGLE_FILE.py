@@ -653,17 +653,45 @@ async def list_agents(user: dict = Depends(require_auth)):
 
 @backend_app.post("/api/chat")
 async def chat(req: ChatRequest, user: dict = Depends(require_auth)):
-    if req.agent_id not in agents:
-        raise HTTPException(status_code=404, detail="Agent not found")
-    
-    agent = agents[req.agent_id]
-    if not user.get("isSuperAdmin") and agent.get("companyId") != user.get("companyId"):
-        raise HTTPException(status_code=403, detail="Unauthorized")
-    
-    rag = SimpleRAGEngine(index_name=agent.get("indexName", f"agent_{req.agent_id}"))
-    result = rag.query(req.query, model=req.model)
-    
-    return {"success": True, "data": result}
+    try:
+        if req.agent_id not in agents:
+            raise HTTPException(status_code=404, detail="Agent not found")
+        
+        agent = agents[req.agent_id]
+        if not user.get("isSuperAdmin") and agent.get("companyId") != user.get("companyId"):
+            raise HTTPException(status_code=403, detail="Unauthorized")
+        
+        # RAG engine'i oluştur ve sorguyu çalıştır
+        try:
+            rag = SimpleRAGEngine(index_name=agent.get("indexName", f"agent_{req.agent_id}"))
+            result = rag.query(req.query, model=req.model)
+            return {"success": True, "data": result}
+        except Exception as e:
+            import traceback
+            error_detail = traceback.format_exc()
+            print(f"[!] RAG Engine hatası: {error_detail}")
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "success": False,
+                    "error": f"RAG Engine hatası: {str(e)}",
+                    "detail": error_detail
+                }
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        error_detail = traceback.format_exc()
+        print(f"[!] Chat endpoint hatası: {error_detail}")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "success": False,
+                "error": f"Sunucu hatası: {str(e)}",
+                "detail": error_detail
+            }
+        )
 
 @backend_app.post("/api/upload")
 async def upload_file(file: UploadFile = File(...), user: dict = Depends(require_auth)):
@@ -832,6 +860,9 @@ def build_gradio_ui():
             )
     
     def chat_fn(message, history, agent_name, model):
+        if not message or not message.strip():
+            return history or [], ""
+        
         if not current_token:
             return history or [], "Önce giriş yapın"
         
@@ -857,6 +888,13 @@ def build_gradio_ui():
         elif "sentiment" in model.lower():
             model_short = "BERT-SENTIMENT"
         
+        # History'yi başlat
+        if history is None:
+            history = []
+        
+        # Kullanıcı mesajını ekle
+        history.append({"role": "user", "content": message})
+        
         try:
             import requests
             resp = requests.post(
@@ -867,13 +905,29 @@ def build_gradio_ui():
             )
             if resp.status_code == 200:
                 data = resp.json()["data"]
-                if history is None:
-                    history = []
-                history.append([message, data["answer"]])
+                # Bot cevabını ekle
+                history.append({"role": "assistant", "content": data.get("answer", "Cevap alınamadı")})
                 return history, ""
-            return history or [], f"Hata: {resp.status_code}"
+            else:
+                error_msg = f"Hata: {resp.status_code}"
+                try:
+                    error_detail = resp.json().get("detail", error_msg)
+                    error_msg = f"Hata {resp.status_code}: {error_detail}"
+                except:
+                    pass
+                history.append({"role": "assistant", "content": error_msg})
+                return history, ""
+        except requests.exceptions.ConnectionError:
+            error_msg = "Backend'e bağlanılamadı. Lütfen birkaç saniye bekleyip tekrar deneyin."
+            history.append({"role": "assistant", "content": error_msg})
+            return history, ""
         except Exception as e:
-            return history or [], f"Hata: {str(e)}"
+            import traceback
+            error_detail = traceback.format_exc()
+            print(f"[!] Chat hatası: {error_detail}")
+            error_msg = f"Hata: {str(e)}"
+            history.append({"role": "assistant", "content": error_msg})
+            return history, ""
     
     def create_agent_fn(name, embedding_model, data_source_type, data_source, uploaded_file, progress_output):
         print(f"[DEBUG] create_agent_fn çağrıldı: name={name}, uploaded_file={uploaded_file}")
