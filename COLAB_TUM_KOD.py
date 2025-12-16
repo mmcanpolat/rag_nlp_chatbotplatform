@@ -1,19 +1,8 @@
-#!/usr/bin/env python3
 # ============================================
-# RAG SaaS Platform - TEK DOSYA BAŞLATMA
+# RAG SaaS Platform - TÜM KOD
 # ============================================
-# Tüm proje bu dosyada - Colab'te tek hücrede çalışır
-# Backend (FastAPI) + Frontend (Gradio) + RAG Engine hepsi burada
-#
-# KULLANIM (Colab):
-# 1. Colab'te yeni hücre oluştur
-# 2. Aşağıdaki komutu çalıştır:
-#    !wget -q -O - https://raw.githubusercontent.com/mmcanpolat/rag_nlp_chatbotplatform/main/COLAB_SINGLE_FILE.py | python3
-#
-# VEYA:
-# 1. GitHub'dan dosyayı kopyala-yapıştır
-# 2. Shift+Enter ile çalıştır
-# 3. Public URL terminal çıktısında görünecek
+# Bu dosyayı Colab'te bir hücreye kopyala-yapıştır ve çalıştır
+# Önce COLAB_INSTALL.py'yi çalıştırmış olmanız gerekir
 
 # Bağımlılıkları kontrol et (kurulum yapma, sadece kontrol)
 import sys
@@ -1013,78 +1002,6 @@ Chat sayfasından agent'ı seçip sorularınızı sorabilirsiniz!
         except Exception as e:
             return f"❌ Hata: {str(e)}"
     
-    # Custom CSS - Koyu tema, profesyonel
-    custom_css = """
-    .gradio-container {
-        background: #1a1a1a !important;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
-    }
-    .gr-button-primary {
-        background: #3b82f6 !important;
-        color: white !important;
-        border: none !important;
-        font-weight: 500 !important;
-    }
-    .gr-button-primary:hover {
-        background: #2563eb !important;
-    }
-    .gr-button {
-        background: #4b5563 !important;
-        color: white !important;
-        border: none !important;
-    }
-    .gr-button:hover {
-        background: #6b7280 !important;
-    }
-    .gr-textbox input, .gr-textbox textarea {
-        background: #2d2d2d !important;
-        color: #e5e5e5 !important;
-        border: 1px solid #404040 !important;
-    }
-    .gr-textbox input:focus, .gr-textbox textarea:focus {
-        border-color: #3b82f6 !important;
-        outline: none !important;
-    }
-    .gr-textbox label {
-        color: #d1d5db !important;
-        font-weight: 500 !important;
-    }
-    .gr-markdown {
-        color: #e5e5e5 !important;
-    }
-    .gr-markdown h1, .gr-markdown h2, .gr-markdown h3 {
-        color: #ffffff !important;
-    }
-    .gr-radio label {
-        color: #d1d5db !important;
-    }
-    .gr-dropdown {
-        background: #2d2d2d !important;
-        color: #e5e5e5 !important;
-        border: 1px solid #404040 !important;
-    }
-    .gr-tabs {
-        background: #1a1a1a !important;
-    }
-    .gr-tab {
-        background: #2d2d2d !important;
-        color: #d1d5db !important;
-    }
-    .gr-tab.selected {
-        background: #3b82f6 !important;
-        color: white !important;
-    }
-    .gr-chatbot {
-        background: #2d2d2d !important;
-    }
-    .gr-chatbot .message {
-        color: #e5e5e5 !important;
-    }
-    body {
-        background: #1a1a1a !important;
-    }
-    """
-    
     # CSS'i Blocks constructor'a ekle (Gradio versiyonuna göre)
     try:
         # Yeni versiyonlar için css parametresi Blocks'ta
@@ -1262,4 +1179,4 @@ if __name__ == "__main__":
     
     # Frontend'i ana thread'de çalıştır (blocking)
     run_frontend()
-                    
+
