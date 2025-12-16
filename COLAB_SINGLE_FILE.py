@@ -25,7 +25,7 @@ required_packages = [
     "fastapi", "uvicorn[standard]", "gradio>=4.0.0", "langchain", "langchain-community",
     "langchain-huggingface", "langchain-text-splitters", "langchain-core", "transformers", 
     "torch", "sentence-transformers", "faiss-cpu", "pypdf", "docx2txt", "beautifulsoup4", 
-    "requests", "python-dotenv"
+    "requests", "python-dotenv" 
 ]
 
 missing = []
@@ -230,23 +230,26 @@ class DocumentIngestor:
                 
                 # Batch'ler halinde ekle (progress için)
                 batch_size = 100
+                total_batches = (len(chunks) + batch_size - 1) // batch_size
                 for i in range(0, len(chunks), batch_size):
                     batch = chunks[i:i+batch_size]
                     vectorstore.add_documents(batch)
                     batch_num = (i // batch_size) + 1
-                    total_batches = (len(chunks) + batch_size - 1) // batch_size
+                    percent = int(((i + len(batch)) / total_chunks) * 100) if total_chunks > 0 else 0
                     if progress_callback:
                         progress_callback(
-                            f"Batch {batch_num}/{total_batches} işleniyor ({len(batch)} parça)...",
+                            f"Batch {batch_num}/{total_batches} işleniyor ({len(batch)} parça) - %{percent}",
                             i + len(batch),
                             total_chunks
                         )
             else:
                 # Yeni index oluştur - batch'ler halinde
                 batch_size = 100
+                total_batches = (len(chunks) + batch_size - 1) // batch_size
                 first_batch = chunks[:batch_size]
+                percent = int((len(first_batch) / total_chunks) * 100) if total_chunks > 0 else 0
                 if progress_callback:
-                    progress_callback(f"İlk batch oluşturuluyor ({len(first_batch)} parça)...", len(first_batch), total_chunks)
+                    progress_callback(f"İlk batch oluşturuluyor ({len(first_batch)} parça) - %{percent}", len(first_batch), total_chunks)
                 
                 vectorstore = FAISS.from_documents(first_batch, self.embeddings)
                 
@@ -255,10 +258,10 @@ class DocumentIngestor:
                     batch = chunks[i:i+batch_size]
                     vectorstore.add_documents(batch)
                     batch_num = (i // batch_size) + 1
-                    total_batches = (len(chunks) + batch_size - 1) // batch_size
+                    percent = int(((i + len(batch)) / total_chunks) * 100) if total_chunks > 0 else 0
                     if progress_callback:
                         progress_callback(
-                            f"Batch {batch_num + 1}/{total_batches} işleniyor ({len(batch)} parça)...",
+                            f"Batch {batch_num + 1}/{total_batches} işleniyor ({len(batch)} parça) - %{percent}",
                             i + len(batch),
                             total_chunks
                         )
@@ -805,11 +808,19 @@ def build_gradio_ui():
         try:
             if not current_token:
                 print("[DEBUG] Token yok")
-                return "Önce giriş yapın", gr.update(visible=False)
+                return (
+                    "Önce giriş yapın", 
+                    gr.update(visible=False),
+                    gr.update()  # Agent dropdown değişmez
+                )
             
             if not name or not name.strip():
                 print("[DEBUG] Agent adı yok")
-                return "Agent adı gerekli", gr.update(visible=False)
+                return (
+                    "Agent adı gerekli", 
+                    gr.update(visible=False),
+                    gr.update()  # Agent dropdown değişmez
+                )
             
             # Progress output'u göster
             progress_msg = "📤 İşlem başlatılıyor..."
@@ -851,13 +862,25 @@ def build_gradio_ui():
                             progress_msg = f"✅ **Dosya yüklendi:** {file_name}\n\n🔄 **Embedding başlıyor...**\n📝 Dosya parse ediliyor ve parçalara bölünüyor..."
                             progress_update = gr.update(visible=True, value=progress_msg)
                         else:
-                            return f"❌ Dosya yükleme hatası: {upload_resp.json().get('detail', 'Bilinmeyen hata')}", gr.update(visible=False)
+                            return (
+                                f"❌ Dosya yükleme hatası: {upload_resp.json().get('detail', 'Bilinmeyen hata')}", 
+                                gr.update(visible=False),
+                                gr.update()  # Agent dropdown değişmez
+                            )
                 except Exception as e:
                     import traceback
                     print(f"[!] Upload hatası: {traceback.format_exc()}")
-                    return f"❌ Dosya yükleme hatası: {str(e)}", gr.update(visible=False)
+                    return (
+                        f"❌ Dosya yükleme hatası: {str(e)}", 
+                        gr.update(visible=False),
+                        gr.update()  # Agent dropdown değişmez
+                    )
             elif not data_source or not data_source.strip():
-                return "URL veya dosya gerekli", gr.update(visible=False)
+                return (
+                    "URL veya dosya gerekli", 
+                    gr.update(visible=False),
+                    gr.update()  # Agent dropdown değişmez
+                )
             else:
                 progress_msg = "🔄 Agent oluşturuluyor ve veriler işleniyor...\n(Bu işlem dosya boyutuna göre birkaç dakika sürebilir)"
                 progress_update = gr.update(visible=True, value=progress_msg)
@@ -885,7 +908,8 @@ def build_gradio_ui():
                     chunks = agent_data.get("chunkCount", ingestion_info.get("chunks", 0))
                     agent_id = agent_data.get("id", "bilinmiyor")
                     
-                    # Agent listesini güncelle
+                    # Agent listesini güncelle ve dropdown'ı güncelle
+                    agent_choices_updated = []
                     try:
                         agent_resp = requests.get(
                             "http://localhost:3000/api/agents",
@@ -895,6 +919,7 @@ def build_gradio_ui():
                         if agent_resp.status_code == 200:
                             nonlocal current_agents
                             current_agents = agent_resp.json()["data"]
+                            agent_choices_updated = [f"{a['name']}" for a in current_agents]
                     except:
                         pass
                     
@@ -918,7 +943,7 @@ Chat sayfasından agent'ı seçip sorularınızı sorabilirsiniz!
 📊 **Terminal'de görebileceğiniz log'lar:**
 - Dosya parse işlemi
 - Chunk oluşturma
-- Batch'ler halinde embedding (örn: Batch 1/5, Batch 2/5...)
+- Batch'ler halinde embedding (örn: Batch 1/5 - %20, Batch 2/5 - %40...)
 - Index kaydetme"""
                     
                     # Agent dropdown'ını güncelle
@@ -928,9 +953,17 @@ Chat sayfasından agent'ı seçip sorularınızı sorabilirsiniz!
                         gr.update(choices=agent_choices_updated, value=agent_choices_updated[0] if agent_choices_updated else None)
                     )
                 else:
-                    return f"❌ Hata: {resp.json().get('detail', 'Bilinmeyen hata')}", gr.update(visible=False)
+                    return (
+                        f"❌ Hata: {resp.json().get('detail', 'Bilinmeyen hata')}", 
+                        gr.update(visible=False),
+                        gr.update()  # Agent dropdown değişmez
+                    )
             except requests.exceptions.Timeout:
-                return "❌ İşlem zaman aşımına uğradı. Dosya çok büyük olabilir.", gr.update(visible=False)
+                return (
+                    "❌ İşlem zaman aşımına uğradı. Dosya çok büyük olabilir.", 
+                    gr.update(visible=False),
+                    gr.update()  # Agent dropdown değişmez
+                )
             except Exception as e:
                 import traceback
                 error_detail = traceback.format_exc()
@@ -944,7 +977,11 @@ Chat sayfasından agent'ı seçip sorularınızı sorabilirsiniz!
             import traceback
             error_detail = traceback.format_exc()
             print(f"[!] Agent oluşturma genel hatası: {error_detail}")
-            return f"❌ Genel hata: {str(e)}", gr.update(visible=False)
+            return (
+                f"❌ Genel hata: {str(e)}", 
+                gr.update(visible=False),
+                gr.update()  # Agent dropdown değişmez
+            )
     
     def create_company_fn(name, email):
         if not current_token:
@@ -1122,12 +1159,16 @@ Chat sayfasından agent'ı seçip sorularınızı sorabilirsiniz!
                             import traceback
                             error_detail = traceback.format_exc()
                             print(f"[DEBUG] Wrapper hatası: {error_detail}")
-                            return f"❌ Beklenmeyen hata: {str(e)}", gr.update(visible=False)
+                            return (
+                                f"❌ Beklenmeyen hata: {str(e)}", 
+                                gr.update(visible=False),
+                                gr.update()  # Agent dropdown değişmez
+                            )
                     
                     create_agent_btn.click(
                         agent_click_wrapper,
                         inputs=[agent_name, agent_embedding, agent_source_type_hidden, agent_source, agent_file_upload],
-                        outputs=[agent_status, agent_progress],
+                        outputs=[agent_status, agent_progress, agent_dropdown],
                         show_progress=True
                     )
         
@@ -1210,3 +1251,4 @@ if __name__ == "__main__":
     
     # Frontend'i ana thread'de çalıştır (blocking)
     run_frontend()
+                    
