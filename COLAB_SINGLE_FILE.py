@@ -15,8 +15,9 @@
 # 2. Shift+Enter ile çalıştır
 # 3. Public URL terminal çıktısında görünecek
 
-# Bağımlılıkları kontrol et (kurulum yapma, sadece kontrol)
+# Bağımlılıkları kontrol et ve eksikleri kur
 import sys
+import subprocess
 
 print("=" * 60)
 print("RAG SaaS Platform - Tek Dosya Başlatma")
@@ -40,6 +41,14 @@ for pkg in required_packages:
             pkg_import = "langchain_text_splitters"
         elif pkg_clean == "langchain-core":
             pkg_import = "langchain_core"
+        elif pkg_clean == "langchain-community":
+            pkg_import = "langchain_community"
+        elif pkg_clean == "langchain-huggingface":
+            pkg_import = "langchain_huggingface"
+        elif pkg_clean == "sentence-transformers":
+            pkg_import = "sentence_transformers"
+        elif pkg_clean == "python-dotenv":
+            pkg_import = "dotenv"
         else:
             pkg_import = pkg_clean.replace("-", "_")
         __import__(pkg_import)
@@ -47,10 +56,54 @@ for pkg in required_packages:
         missing.append(pkg)
 
 if missing:
-    print(f"❌ {len(missing)} paket eksik!")
-    print("Lütfen önce COLAB_INSTALL.py dosyasını çalıştırın:")
-    print("  !wget -q -O - https://raw.githubusercontent.com/mmcanpolat/rag_nlp_chatbotplatform/main/COLAB_INSTALL.py | python3")
-    sys.exit(1)
+    print(f"⚠️  {len(missing)} paket eksik, kuruluyor...")
+    print(f"   Eksik paketler: {', '.join(missing)}")
+    print("   (Bu işlem 5-10 dakika sürebilir...)\n")
+    
+    # Eksik paketleri kur
+    try:
+        subprocess.run(
+            [sys.executable, "-m", "pip", "install", "-q", "--upgrade"] + missing,
+            check=False,
+            timeout=600  # 10 dakika timeout
+        )
+        print("✅ Eksik paketler kuruldu")
+        
+        # Tekrar kontrol et
+        still_missing = []
+        for pkg in missing:
+            try:
+                pkg_clean = pkg.split("[")[0].split(">=")[0]
+                if pkg_clean == "langchain-text-splitters":
+                    pkg_import = "langchain_text_splitters"
+                elif pkg_clean == "langchain-core":
+                    pkg_import = "langchain_core"
+                elif pkg_clean == "langchain-community":
+                    pkg_import = "langchain_community"
+                elif pkg_clean == "langchain-huggingface":
+                    pkg_import = "langchain_huggingface"
+                elif pkg_clean == "sentence-transformers":
+                    pkg_import = "sentence_transformers"
+                elif pkg_clean == "python-dotenv":
+                    pkg_import = "dotenv"
+                else:
+                    pkg_import = pkg_clean.replace("-", "_")
+                __import__(pkg_import)
+            except ImportError:
+                still_missing.append(pkg)
+        
+        if still_missing:
+            print(f"❌ Hala eksik paketler var: {', '.join(still_missing)}")
+            print("Lütfen manuel olarak kurun:")
+            print(f"  !pip install {' '.join(still_missing)}")
+            sys.exit(1)
+        else:
+            print("✅ Tüm bağımlılıklar kuruldu ve kontrol edildi")
+    except Exception as e:
+        print(f"❌ Paket kurulumu sırasında hata: {e}")
+        print("Lütfen manuel olarak kurun:")
+        print(f"  !pip install {' '.join(missing)}")
+        sys.exit(1)
 else:
     print("✅ Tüm bağımlılıklar mevcut")
 
