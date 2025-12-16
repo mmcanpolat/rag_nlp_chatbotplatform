@@ -864,7 +864,7 @@ async def list_agents(user: dict = Depends(require_auth)):
     return {"success": True, "data": user_agents}
 
 @backend_app.post("/api/chat")
-async def chat(req: ChatRequest, user: dict = Depends(require_auth)):
+async def chat(req: ChatRequest):
     try:
         # Sabit index kullan (default)
         index_name = "default"
@@ -918,9 +918,6 @@ async def upload_file(file: UploadFile = File(...), user: dict = Depends(require
 
 # ==================== GRADIO FRONTEND ====================
 def build_gradio_ui():
-    current_user = {"username": "Giriş yapılmadı"}
-    current_token = None
-    current_agents = []
     # Her model için ayrı chat history tut
     model_chat_histories = {
         "GPT": [],
@@ -1438,15 +1435,7 @@ Chat sayfasından agent'ı seçip sorularınızı sorabilirsiniz!
     with app:
         gr.Markdown("# RAG SaaS Platform")
         
-        with gr.Tab("Giriş", visible=True) as login_tab:
-            with gr.Row():
-                with gr.Column():
-                    login_user = gr.Textbox(label="Kullanıcı Adı", value="admin@ragplatform.com")
-                    login_pass = gr.Textbox(label="Şifre", type="password", value="Admin123!@#")
-                    login_btn = gr.Button("Giriş Yap", variant="primary")
-                    login_status = gr.Markdown()
-        
-        with gr.Tab("Chat", visible=False) as chat_tab:
+        with gr.Tab("Chat", visible=True) as chat_tab:
             with gr.Row():
                 with gr.Column():
                     model_radio = gr.Radio(
@@ -1481,7 +1470,7 @@ Chat sayfasından agent'ı seçip sorularınızı sorabilirsiniz!
                         outputs=[chatbot, msg_input]
                     )
         
-        with gr.Tab("Analytics", visible=False) as analytics_tab:
+        with gr.Tab("Analytics", visible=True) as analytics_tab:
             with gr.Row():
                 with gr.Column():
                     gr.Markdown("## Model Performance Metrics")
