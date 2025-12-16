@@ -1600,7 +1600,7 @@ if __name__ == "__main__":
     
     print("\n[5/5] Frontend başlatılıyor...")
     print("\n" + "=" * 60)
-    print("🔑 Giriş: admin@ragplatform.com / Admin123!@#")
+    print("🚀 RAG Platform hazır!")
     print("=" * 60)
     print("\n⏳ Gradio public URL oluşturuluyor...")
     print("   (Bu işlem 10-20 saniye sürebilir)\n")
