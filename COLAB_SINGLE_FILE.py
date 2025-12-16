@@ -28,7 +28,7 @@ required_packages = [
     "fastapi", "uvicorn[standard]", "gradio>=4.0.0", "langchain", "langchain-community",
     "langchain-huggingface", "langchain-text-splitters", "langchain-core", "transformers", 
     "torch", "sentence-transformers", "faiss-cpu", "pypdf", "docx2txt", "beautifulsoup4", 
-    "requests", "python-dotenv" 
+    "requests", "python-dotenv", "rouge-score", "matplotlib", "pandas", "numpy", "seaborn"
 ]
 
 missing = []
@@ -538,6 +538,159 @@ CEVAP:"""
             "response_time_ms": round((time.time() - start) * 1000, 2)
         }
 
+# ==================== EVALUATION METRICS ====================
+class MetricsEvaluator:
+    """Evaluation metrikleri hesaplama: Exact Match, F1, ROUGE-L, Cosine Similarity"""
+    
+    def __init__(self):
+        from sentence_transformers import SentenceTransformer
+        from rouge_score import rouge_scorer
+        self.embed_model = SentenceTransformer("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
+        self.rouge_scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
+    
+    def exact_match(self, pred: str, ref: str) -> float:
+        """Exact Match: Harfi harfine aynı mı?"""
+        return 1.0 if pred.strip().lower() == ref.strip().lower() else 0.0
+    
+    def f1_score(self, pred: str, ref: str) -> float:
+        """Token-based F1 Score"""
+        pred_tokens = set(pred.lower().split())
+        ref_tokens = set(ref.lower().split())
+        
+        if not pred_tokens or not ref_tokens:
+            return 0.0
+        
+        common = pred_tokens & ref_tokens
+        if not common:
+            return 0.0
+        
+        precision = len(common) / len(pred_tokens)
+        recall = len(common) / len(ref_tokens)
+        
+        if precision + recall == 0:
+            return 0.0
+        
+        return 2 * precision * recall / (precision + recall)
+    
+    def rouge_l(self, pred: str, ref: str) -> float:
+        """ROUGE-L F1 Score"""
+        scores = self.rouge_scorer.score(ref, pred)
+        return scores['rougeL'].fmeasure
+    
+    def cosine_similarity(self, pred: str, ref: str) -> float:
+        """Cosine Similarity - embedding bazlı"""
+        vecs = self.embed_model.encode([pred, ref])
+        import numpy as np
+        return float(np.dot(vecs[0], vecs[1]) / (np.linalg.norm(vecs[0]) * np.linalg.norm(vecs[1])))
+    
+    def evaluate(self, predictions: List[str], references: List[str]) -> Dict:
+        """Tüm metrikleri hesapla"""
+        if len(predictions) != len(references):
+            return {"error": "Predictions ve references aynı uzunlukta olmalı"}
+        
+        em_scores = []
+        f1_scores = []
+        rouge_scores = []
+        cosine_scores = []
+        
+        for pred, ref in zip(predictions, references):
+            em_scores.append(self.exact_match(pred, ref))
+            f1_scores.append(self.f1_score(pred, ref))
+            rouge_scores.append(self.rouge_l(pred, ref))
+            cosine_scores.append(self.cosine_similarity(pred, ref))
+        
+        return {
+            "exact_match": {
+                "scores": em_scores,
+                "mean": sum(em_scores) / len(em_scores) if em_scores else 0.0
+            },
+            "f1": {
+                "scores": f1_scores,
+                "mean": sum(f1_scores) / len(f1_scores) if f1_scores else 0.0
+            },
+            "rouge_l": {
+                "scores": rouge_scores,
+                "mean": sum(rouge_scores) / len(rouge_scores) if rouge_scores else 0.0
+            },
+            "cosine_similarity": {
+                "scores": cosine_scores,
+                "mean": sum(cosine_scores) / len(cosine_scores) if cosine_scores else 0.0
+            }
+        }
+    
+    def plot_metrics(self, results: Dict[str, Dict], save_path: str = None):
+        """Metrikleri görselleştir"""
+        import matplotlib.pyplot as plt
+        import pandas as pd
+        
+        models = list(results.keys())
+        metrics_data = {
+            "Exact Match": [results[m]["exact_match"]["mean"] for m in models],
+            "F1 Score": [results[m]["f1"]["mean"] for m in models],
+            "ROUGE-L": [results[m]["rouge_l"]["mean"] for m in models],
+            "Cosine Similarity": [results[m]["cosine_similarity"]["mean"] for m in models]
+        }
+        
+        df = pd.DataFrame(metrics_data, index=models)
+        
+        fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+        fig.suptitle("Model Performance Metrics Comparison", fontsize=16, fontweight="bold")
+        
+        # Bar chart - Tüm metrikler
+        ax1 = axes[0, 0]
+        df.plot(kind="bar", ax=ax1, width=0.8)
+        ax1.set_title("All Metrics Comparison")
+        ax1.set_ylabel("Score")
+        ax1.set_xlabel("Model")
+        ax1.legend(loc="best")
+        ax1.grid(axis="y", alpha=0.3)
+        ax1.set_ylim(0, 1)
+        
+        # Line chart
+        ax2 = axes[0, 1]
+        df.plot(kind="line", ax=ax2, marker="o", linewidth=2, markersize=8)
+        ax2.set_title("Metrics Trend")
+        ax2.set_ylabel("Score")
+        ax2.set_xlabel("Model")
+        ax2.legend(loc="best")
+        ax2.grid(alpha=0.3)
+        ax2.set_ylim(0, 1)
+        
+        # Heatmap
+        ax3 = axes[1, 0]
+        import seaborn as sns
+        sns.heatmap(df.T, annot=True, fmt=".3f", cmap="YlOrRd", ax=ax3, cbar_kws={"label": "Score"})
+        ax3.set_title("Metrics Heatmap")
+        ax3.set_ylabel("Metric")
+        ax3.set_xlabel("Model")
+        
+        # Radar chart (spider chart)
+        ax4 = axes[1, 1]
+        angles = np.linspace(0, 2 * np.pi, len(df.columns), endpoint=False).tolist()
+        angles += angles[:1]  # Kapat
+        
+        ax4 = plt.subplot(2, 2, 4, projection="polar")
+        for idx, model in enumerate(models):
+            values = [df.loc[model, col] for col in df.columns]
+            values += values[:1]  # Kapat
+            ax4.plot(angles, values, "o-", linewidth=2, label=model)
+            ax4.fill(angles, values, alpha=0.25)
+        
+        ax4.set_xticks(angles[:-1])
+        ax4.set_xticklabels(df.columns)
+        ax4.set_ylim(0, 1)
+        ax4.set_title("Radar Chart", pad=20)
+        ax4.legend(loc="upper right", bbox_to_anchor=(1.3, 1.1))
+        ax4.grid(True)
+        
+        plt.tight_layout()
+        
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches="tight")
+            print(f"[*] Grafik kaydedildi: {save_path}")
+        
+        return fig
+
 # ==================== FASTAPI BACKEND ====================
 backend_app = FastAPI(title="RAG SaaS Platform API")
 backend_app.add_middleware(
@@ -713,16 +866,19 @@ async def list_agents(user: dict = Depends(require_auth)):
 @backend_app.post("/api/chat")
 async def chat(req: ChatRequest, user: dict = Depends(require_auth)):
     try:
-        if req.agent_id not in agents:
-            raise HTTPException(status_code=404, detail="Agent not found")
+        # Sabit index kullan (default)
+        index_name = "default"
         
-        agent = agents[req.agent_id]
-        if not user.get("isSuperAdmin") and agent.get("companyId") != user.get("companyId"):
-            raise HTTPException(status_code=403, detail="Unauthorized")
+        # Eğer agent_id varsa ve geçerliyse onu kullan, yoksa default kullan
+        if req.agent_id and req.agent_id in agents:
+            agent = agents[req.agent_id]
+            if not user.get("isSuperAdmin") and agent.get("companyId") != user.get("companyId"):
+                raise HTTPException(status_code=403, detail="Unauthorized")
+            index_name = agent.get("indexName", f"agent_{req.agent_id}")
         
         # RAG engine'i oluştur ve sorguyu çalıştır
         try:
-            rag = SimpleRAGEngine(index_name=agent.get("indexName", f"agent_{req.agent_id}"))
+            rag = SimpleRAGEngine(index_name=index_name)
             result = rag.query(req.query, model_type=req.model)
             return {"success": True, "data": result}
         except Exception as e:
@@ -765,6 +921,12 @@ def build_gradio_ui():
     current_user = {"username": "Giriş yapılmadı"}
     current_token = None
     current_agents = []
+    # Her model için ayrı chat history tut
+    model_chat_histories = {
+        "GPT": [],
+        "BERT-CASED": [],
+        "BERT-SENTIMENT": []
+    }
     
     # Custom CSS - Koyu tema, profesyonel
     custom_css = """
@@ -886,8 +1048,7 @@ def build_gradio_ui():
                     gr.update(visible=False),  # Login tab'ı gizle
                     gr.update(visible=True),   # Chat tab'ı göster
                     gr.update(visible=current_user.get("isSuperAdmin", False)),  # Companies tab
-                    gr.update(visible=True),   # Agents tab
-                    gr.update(choices=agent_choices, value=agent_choices[0] if agent_choices else None)
+                    gr.update(visible=True)    # Analytics tab
                 )
             else:
                 error_msg = resp.json().get("detail", "Giriş başarısız")
@@ -896,8 +1057,7 @@ def build_gradio_ui():
                     gr.update(visible=True),   # Login tab görünür
                     gr.update(visible=False),  # Chat tab gizli
                     gr.update(visible=False),  # Companies tab gizli
-                    gr.update(visible=False),  # Agents tab gizli
-                    gr.update()                # Agent dropdown boş
+                    gr.update(visible=False)   # Analytics tab gizli
                 )
         except requests.exceptions.ConnectionError:
             return (
@@ -905,8 +1065,7 @@ def build_gradio_ui():
                 gr.update(visible=True),   # Login tab görünür
                 gr.update(visible=False),  # Chat tab gizli
                 gr.update(visible=False),  # Companies tab gizli
-                gr.update(visible=False),  # Agents tab gizli
-                gr.update()                # Agent dropdown boş
+                gr.update(visible=False)   # Analytics tab gizli
             )
         except Exception as e:
             return (
@@ -914,58 +1073,57 @@ def build_gradio_ui():
                 gr.update(visible=True),   # Login tab görünür
                 gr.update(visible=False),  # Chat tab gizli
                 gr.update(visible=False),  # Companies tab gizli
-                gr.update(visible=False),  # Agents tab gizli
-                gr.update()                # Agent dropdown boş
+                gr.update(visible=False)   # Analytics tab gizli
             )
     
-    def chat_fn(message, history, agent_name, model):
+    def get_model_key(model_name):
+        """Model adından kısa key çıkar"""
+        if "gpt2-turkish" in model_name.lower() or "gpt-2" in model_name.lower() or "gpt2" in model_name.lower():
+            return "GPT"
+        elif "bert-base-turkish" in model_name.lower() and "sentiment" not in model_name.lower():
+            return "BERT-CASED"
+        elif "sentiment" in model_name.lower():
+            return "BERT-SENTIMENT"
+        return "GPT"
+    
+    def chat_fn(message, history, model):
+        """Chat fonksiyonu - agent_id artık gerekmiyor, sabit index kullanıyoruz"""
         if not message or not message.strip():
             return history or [], ""
         
         if not current_token:
             return history or [], "Önce giriş yapın"
         
-        if not agent_name or not current_agents:
-            return history or [], "Agent seçin veya oluşturun"
+        # Model key'ini al
+        model_key = get_model_key(model)
         
-        # Agent ID'yi bul
-        agent_id = None
-        for a in current_agents:
-            if a['name'] == agent_name:
-                agent_id = a['id']
-                break
-        
-        if not agent_id:
-            return history or [], "Agent bulunamadı"
-        
-        # Model adını parse et (tam model adından kısa adı çıkar)
-        model_short = "GPT"
-        if "gpt2-turkish" in model.lower() or "gpt-2" in model.lower() or "gpt2" in model.lower():
-            model_short = "GPT"
-        elif "bert-base-turkish" in model.lower() and "sentiment" not in model.lower():
-            model_short = "BERT-CASED"
-        elif "sentiment" in model.lower():
-            model_short = "BERT-SENTIMENT"
-        
-        # History'yi başlat
+        # Bu model için history'yi al (yoksa başlat)
         if history is None:
-            history = []
+            history = model_chat_histories.get(model_key, []).copy()
+        else:
+            # History'yi güncelle
+            model_chat_histories[model_key] = history.copy()
         
         # Kullanıcı mesajını ekle
         history.append({"role": "user", "content": message})
         
         try:
             import requests
+            # Sabit agent_id kullan (default index)
+            # Backend'de default agent oluşturulmuş olmalı veya direkt RAG engine kullan
             resp = requests.post(
                 "http://localhost:3000/api/chat",
-                json={"agent_id": agent_id, "query": message, "model": model_short},
+                json={"agent_id": "default", "query": message, "model": model_key},
                 headers={"Authorization": f"Bearer {current_token}"},
                 timeout=60
             )
             if resp.status_code == 200:
                 data = resp.json()["data"]
                 # Bot cevabını ekle
-                history.append({"role": "assistant", "content": data.get("answer", "Cevap alınamadı")})
+                answer = data.get("answer", "Cevap alınamadı")
+                history.append({"role": "assistant", "content": answer})
+                # History'yi kaydet
+                model_chat_histories[model_key] = history.copy()
                 return history, ""
             else:
                 error_msg = f"Hata: {resp.status_code}"
@@ -975,10 +1133,12 @@ def build_gradio_ui():
                 except:
                     pass
                 history.append({"role": "assistant", "content": error_msg})
+                model_chat_histories[model_key] = history.copy()
                 return history, ""
         except requests.exceptions.ConnectionError:
             error_msg = "Backend'e bağlanılamadı. Lütfen birkaç saniye bekleyip tekrar deneyin."
             history.append({"role": "assistant", "content": error_msg})
+            model_chat_histories[model_key] = history.copy()
             return history, ""
         except Exception as e:
             import traceback
@@ -986,7 +1146,14 @@ def build_gradio_ui():
             print(f"[!] Chat hatası: {error_detail}")
             error_msg = f"Hata: {str(e)}"
             history.append({"role": "assistant", "content": error_msg})
+            model_chat_histories[model_key] = history.copy()
             return history, ""
+    
+    def update_chat_history(model):
+        """Model değiştiğinde o modelin history'sini göster"""
+        model_key = get_model_key(model)
+        history = model_chat_histories.get(model_key, [])
+        return history
     
     def create_agent_fn(name, embedding_model, data_source_type, data_source, uploaded_file, progress_output):
         print(f"[DEBUG] create_agent_fn çağrıldı: name={name}, uploaded_file={uploaded_file}")
@@ -1282,7 +1449,6 @@ Chat sayfasından agent'ı seçip sorularınızı sorabilirsiniz!
         with gr.Tab("Chat", visible=False) as chat_tab:
             with gr.Row():
                 with gr.Column():
-                    agent_dropdown = gr.Dropdown(choices=[], label="Agent Seç", interactive=True)
                     model_radio = gr.Radio(
                         [
                             "dbmdz/gpt2-turkish (GPT-2 Türkçe)",
@@ -1290,71 +1456,112 @@ Chat sayfasından agent'ı seçip sorularınızı sorabilirsiniz!
                             "savasy/bert-base-turkish-sentiment-cased (BERT Sentiment)"
                         ],
                         value="dbmdz/gpt2-turkish (GPT-2 Türkçe)",
-                        label="Model"
+                        label="Model Seç",
+                        info="Her model için ayrı chat geçmişi tutulur"
                     )
                     chatbot = gr.Chatbot(label="Chat", height=500, type="messages", allow_tags=False)
                     msg_input = gr.Textbox(label="Mesaj", placeholder="Sorunuzu yazın...")
                     send_btn = gr.Button("Gönder", variant="primary")
                     
+                    # Model değiştiğinde history'yi güncelle
+                    model_radio.change(
+                        update_chat_history,
+                        inputs=[model_radio],
+                        outputs=[chatbot]
+                    )
+                    
                     send_btn.click(
                         chat_fn,
-                        inputs=[msg_input, chatbot, agent_dropdown, model_radio],
+                        inputs=[msg_input, chatbot, model_radio],
                         outputs=[chatbot, msg_input]
                     )
                     msg_input.submit(
                         chat_fn,
-                        inputs=[msg_input, chatbot, agent_dropdown, model_radio],
+                        inputs=[msg_input, chatbot, model_radio],
                         outputs=[chatbot, msg_input]
                     )
         
-        with gr.Tab("Agent Oluştur", visible=False) as agents_tab:
+        with gr.Tab("Analytics", visible=False) as analytics_tab:
             with gr.Row():
                 with gr.Column():
-                    agent_name = gr.Textbox(label="Agent Adı", placeholder="Örn: Müşteri Destek Botu")
-                    agent_embedding = gr.Dropdown(
-                        choices=["sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"],
-                        value="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
-                        label="Embedding Model"
-                    )
-                    gr.Markdown("### Veri Kaynağı")
-                    agent_file_upload = gr.File(
-                        label="Dosya Yükle (PDF, DOCX, TXT, JSON, CSV)",
-                        file_types=[".pdf", ".docx", ".txt", ".json", ".csv"]
-                    )
-                    gr.Markdown("**VEYA**")
-                    agent_source = gr.Textbox(
-                        label="URL veya Dosya Yolu", 
-                        placeholder="https://example.com/article veya /path/to/file.pdf"
-                    )
-                    create_agent_btn = gr.Button("Agent Oluştur", variant="primary")
-                    agent_status = gr.Markdown()
-                    agent_progress = gr.Markdown(visible=False, value="")
+                    gr.Markdown("## Model Performance Metrics")
+                    gr.Markdown("Her model için Exact Match, F1 Score, ROUGE-L ve Cosine Similarity metrikleri hesaplanır.")
                     
-                    # data_source_type için hidden state
-                    agent_source_type_hidden = gr.State(value="file")
+                    evaluate_btn = gr.Button("Metrikleri Hesapla ve Grafikle", variant="primary")
+                    metrics_output = gr.Markdown()
+                    metrics_plot = gr.Image(label="Metrics Comparison Chart")
                     
-                    def agent_click_wrapper(name, embedding_model, data_source_type, data_source, uploaded_file):
-                        print(f"[DEBUG] agent_click_wrapper çağrıldı: name={name}, uploaded_file={uploaded_file}")
+                    def evaluate_models():
+                        """Tüm modelleri değerlendir ve grafik oluştur"""
                         try:
-                            # create_agent_fn artık 3 değer döndürüyor: (status_msg, progress_update, agent_dropdown_update)
-                            result = create_agent_fn(name, embedding_model, data_source_type, data_source, uploaded_file, None)
-                            print(f"[DEBUG] create_agent_fn sonucu: {result}")
-                            return result
+                            # Test verisini yükle (CSV'den)
+                            import pandas as pd
+                            csv_path = "/content/sample_data/test_cleaned.csv"
+                            if not os.path.exists(csv_path):
+                                csv_path = str(BASE_DIR / "python_services" / "data" / "test_cleaned.csv")
+                            
+                            if not os.path.exists(csv_path):
+                                return "❌ Test CSV dosyası bulunamadı. Lütfen /content/sample_data/test_cleaned.csv konumuna yerleştirin.", None
+                            
+                            df = pd.read_csv(csv_path)
+                            # question_content ve question_answer sütunlarını kullan
+                            if "question_content" not in df.columns or "question_answer" not in df.columns:
+                                return "❌ CSV'de 'question_content' ve 'question_answer' sütunları bulunamadı.", None
+                            
+                            questions = df["question_content"].dropna().tolist()[:50]  # İlk 50 soru
+                            references = df["question_answer"].dropna().tolist()[:50]
+                            
+                            if len(questions) != len(references):
+                                return f"❌ Soru ve cevap sayıları eşleşmiyor: {len(questions)} soru, {len(references)} cevap", None
+                            
+                            evaluator = MetricsEvaluator()
+                            rag = SimpleRAGEngine(index_name="default")
+                            
+                            models_to_test = ["GPT", "BERT-CASED", "BERT-SENTIMENT"]
+                            all_results = {}
+                            
+                            for model_key in models_to_test:
+                                print(f"[*] {model_key} modeli test ediliyor...")
+                                predictions = []
+                                
+                                for q in questions:
+                                    try:
+                                        result = rag.query(q, model_type=model_key)
+                                        predictions.append(result.get("answer", ""))
+                                    except Exception as e:
+                                        print(f"[!] {model_key} için hata: {e}")
+                                        predictions.append("")
+                                
+                                # Metrikleri hesapla
+                                metrics = evaluator.evaluate(predictions, references)
+                                all_results[model_key] = metrics
+                            
+                            # Grafik oluştur
+                            plots_dir = BASE_DIR / "frontend_gradio" / "assets" / "plots"
+                            plots_dir.mkdir(parents=True, exist_ok=True)
+                            plot_path = plots_dir / "metrics_comparison.png"
+                            
+                            fig = evaluator.plot_metrics(all_results, save_path=str(plot_path))
+                            
+                            # Sonuçları formatla
+                            result_text = "## 📊 Model Performance Results\n\n"
+                            for model_key, metrics in all_results.items():
+                                result_text += f"### {model_key}\n"
+                                result_text += f"- **Exact Match:** {metrics['exact_match']['mean']:.3f}\n"
+                                result_text += f"- **F1 Score:** {metrics['f1']['mean']:.3f}\n"
+                                result_text += f"- **ROUGE-L:** {metrics['rouge_l']['mean']:.3f}\n"
+                                result_text += f"- **Cosine Similarity:** {metrics['cosine_similarity']['mean']:.3f}\n\n"
+                            
+                            return result_text, str(plot_path)
                         except Exception as e:
                             import traceback
                             error_detail = traceback.format_exc()
-                            print(f"[DEBUG] Wrapper hatası: {error_detail}")
-                            return (
-                                f"❌ Beklenmeyen hata: {str(e)}", 
-                                gr.update(visible=False),
-                                gr.update()  # Agent dropdown değişmez
-                            )
+                            print(f"[!] Evaluation hatası: {error_detail}")
+                            return f"❌ Hata: {str(e)}\n\n```\n{error_detail}\n```", None
                     
-                    create_agent_btn.click(
-                        agent_click_wrapper,
-                        inputs=[agent_name, agent_embedding, agent_source_type_hidden, agent_source, agent_file_upload],
-                        outputs=[agent_status, agent_progress, agent_dropdown],
-                        show_progress=True
+                    evaluate_btn.click(
+                        evaluate_models,
+                        outputs=[metrics_output, metrics_plot]
                     )
         
         with gr.Tab("Şirket Yönetimi", visible=False) as companies_tab:
@@ -1374,7 +1581,7 @@ Chat sayfasından agent'ı seçip sorularınızı sorabilirsiniz!
         login_btn.click(
             login_fn,
             inputs=[login_user, login_pass],
-            outputs=[login_status, login_tab, chat_tab, companies_tab, agents_tab, agent_dropdown]
+            outputs=[login_status, login_tab, chat_tab, companies_tab, analytics_tab]
         )
     
     return app, custom_css
