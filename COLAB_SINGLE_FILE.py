@@ -395,13 +395,24 @@ class SimpleRAGEngine:
         index_file = self.index_path / "index.faiss"
         if index_file.exists():
             try:
+                print(f"[*] Index yükleniyor: {self.index_path}")
                 self.vectorstore = FAISS.load_local(
                     str(self.index_path),
                     self.embeddings,
                     allow_dangerous_deserialization=True
                 )
-            except:
-                pass
+                # Index'teki doküman sayısını kontrol et
+                if self.vectorstore:
+                    doc_count = self.vectorstore.index.ntotal if hasattr(self.vectorstore.index, 'ntotal') else 0
+                    print(f"[*] ✅ Index yüklendi: {doc_count} doküman bulundu")
+                else:
+                    print(f"[!] Index yüklendi ama vectorstore boş")
+            except Exception as e:
+                import traceback
+                print(f"[!] Index yükleme hatası: {traceback.format_exc()}")
+        else:
+            print(f"[!] Index dosyası bulunamadı: {index_file}")
+            print(f"[!] Lütfen önce CSV dosyasını yükleyin ve embed edin")
     
     def _load_gpt_model(self):
         if self._gpt_model is None:
@@ -442,10 +453,18 @@ class SimpleRAGEngine:
     
     def retrieve(self, query: str, top_k: int = 3) -> List[Dict]:
         if not self.vectorstore:
+            print("[!] Vectorstore yok! Index yüklenmemiş olabilir.")
             return []
-        results = self.vectorstore.similarity_search_with_score(query, k=top_k)
-        return [{'context': doc.page_content, 'score': float(1 - score)} 
-                for doc, score in results]
+        # Similarity search - en alakalı k=3 diyaloğu getir
+        try:
+            results = self.vectorstore.similarity_search_with_score(query, k=top_k)
+            print(f"[*] Similarity search: {len(results)} sonuç bulundu")
+            return [{'context': doc.page_content, 'score': float(1 - score)} 
+                    for doc, score in results]
+        except Exception as e:
+            import traceback
+            print(f"[!] Similarity search hatası: {traceback.format_exc()}")
+            return []
     
     def _ask_gpt(self, query: str, contexts: List[str]) -> Tuple[str, float]:
         try:
