@@ -405,23 +405,35 @@ class SimpleRAGEngine:
     
     def _load_gpt_model(self):
         if self._gpt_model is None:
-            print("[*] Türkçe GPT-2 yükleniyor...")
+            print("[*] Türkçe GPT-2 modeli yükleniyor...")
             device = 'cuda' if torch.cuda.is_available() else 'cpu'
-            # Model adını düzelt - doğru Hugging Face model adı
-            model_name = "dbmdz/bert-base-turkish-cased"  # Bu BERT, GPT-2 için alternatif kullanacağız
-            # GPT-2 Türkçe modeli yoksa, İngilizce GPT-2 kullan veya basit bir fallback
-            try:
-                # Önce Türkçe GPT-2'yi dene
-                gpt2_turkish = "dbmdz/gpt2-turkish-cased"
-                self._gpt_tokenizer = GPT2Tokenizer.from_pretrained(gpt2_turkish)
-                self._gpt_model = GPT2LMHeadModel.from_pretrained(gpt2_turkish)
-            except Exception as e:
-                print(f"[!] Türkçe GPT-2 yüklenemedi: {e}")
-                print("[*] İngilizce GPT-2 kullanılıyor (fallback)...")
-                # Fallback: İngilizce GPT-2
+            
+            # Türkçe GPT-2 modelleri - sırayla dene
+            turkish_models = [
+                "redrussianarmy/gpt2-turkish-cased",  # En yaygın Türkçe GPT-2
+                "gorkemgoknar/gpt2-small-turkish",    # Alternatif Türkçe model
+                "cenkersisman/gpt2-turkish-256-token" # Başka bir Türkçe model
+            ]
+            
+            model_loaded = False
+            for model_name in turkish_models:
+                try:
+                    print(f"[*] Model deneniyor: {model_name}...")
+                    self._gpt_tokenizer = GPT2Tokenizer.from_pretrained(model_name)
+                    self._gpt_model = GPT2LMHeadModel.from_pretrained(model_name)
+                    print(f"[*] ✅ Türkçe GPT-2 modeli yüklendi: {model_name}")
+                    model_loaded = True
+                    break
+                except Exception as e:
+                    print(f"[!] {model_name} yüklenemedi: {str(e)[:100]}")
+                    continue
+            
+            if not model_loaded:
+                print("[!] Hiçbir Türkçe model yüklenemedi, İngilizce GPT-2 kullanılıyor...")
                 model_name = "gpt2"
                 self._gpt_tokenizer = GPT2Tokenizer.from_pretrained(model_name)
                 self._gpt_model = GPT2LMHeadModel.from_pretrained(model_name)
+                print(f"[*] ⚠️ İngilizce GPT-2 modeli yüklendi (fallback): {model_name}")
             
             self._gpt_model.to(device)
             self._gpt_model.eval()
@@ -441,36 +453,61 @@ class SimpleRAGEngine:
             if self._gpt_model is None:
                 return "Model yüklenemedi", 0.0
             
-            ctx_text = "\n\n".join([f"[{i+1}] {c[:200]}" for i, c in enumerate(contexts)])
-            prompt = f"Bilgiler: {ctx_text}\n\nSoru: {query}\nCevap:"
+            # Context'i hazırla - her context'i ayrı satır olarak
+            context_text = "\n\n".join([doc for doc in contexts])
+            
+            # Prompt yapısı: Context + Soru formatı (kullanıcının istediği format)
+            prompt = f"""Aşağıdaki tıbbi soru-cevap geçmişine dayanarak hastanın sorusunu cevapla.
+Eğer verilen context içinde cevap yoksa, "Bilmiyorum" de.
+
+CONTEXT:
+{context_text}
+
+SORU:
+{query}
+
+CEVAP:"""
             
             device = next(self._gpt_model.parameters()).device
-            inputs = self._gpt_tokenizer.encode(prompt, return_tensors="pt", max_length=512, truncation=True)
+            inputs = self._gpt_tokenizer.encode(prompt, return_tensors="pt", max_length=1024, truncation=True)
             inputs = inputs.to(device)
             
             with torch.no_grad():
                 outputs = self._gpt_model.generate(
                     inputs,
-                    max_length=inputs.shape[1] + 100,
-                    min_length=inputs.shape[1] + 10,
+                    max_length=inputs.shape[1] + 150,
+                    min_length=inputs.shape[1] + 20,
                     temperature=0.7,
                     do_sample=True,
                     pad_token_id=self._gpt_tokenizer.eos_token_id,
                     eos_token_id=self._gpt_tokenizer.eos_token_id,
-                    repetition_penalty=1.2
+                    repetition_penalty=1.2,
+                    no_repeat_ngram_size=3
                 )
             
             generated = outputs[0][inputs.shape[1]:]
             answer = self._gpt_tokenizer.decode(generated, skip_special_tokens=True).strip()
             
-            if len(answer) < 10:
-                answer = contexts[0][:200] + "..." if contexts else "Bilgi bulunamadı."
-                conf = 0.6
+            # Eğer cevap çok kısa veya anlamsızsa, context'ten direkt al
+            if len(answer) < 15 or "bilmiyorum" in answer.lower() or answer.lower().startswith("bilmiyorum"):
+                # Context'lerden en alakalı olanı kullan (ilk context en yüksek skorlu)
+                if contexts:
+                    # İlk context'i kullan (en yüksek skorlu)
+                    answer = contexts[0] if len(contexts[0]) < 500 else contexts[0][:500] + "..."
+                    conf = 0.7
+                else:
+                    answer = "Bilgi bulunamadı."
+                    conf = 0.3
             else:
                 conf = min(0.85, 0.5 + len(answer) / 200)
             
             return answer, conf
         except Exception as e:
+            import traceback
+            print(f"[!] GPT model hatası: {traceback.format_exc()}")
+            # Fallback: Context'ten direkt cevap ver
+            if contexts:
+                return contexts[0][:300] + "..." if len(contexts[0]) > 300 else contexts[0], 0.6
             return f"Hata: {str(e)}", 0.0
     
     def query(self, text: str, model_type: str = "GPT") -> Dict:
