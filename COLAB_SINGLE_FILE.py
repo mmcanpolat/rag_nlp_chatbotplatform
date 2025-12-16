@@ -664,7 +664,7 @@ async def chat(req: ChatRequest, user: dict = Depends(require_auth)):
         # RAG engine'i oluştur ve sorguyu çalıştır
         try:
             rag = SimpleRAGEngine(index_name=agent.get("indexName", f"agent_{req.agent_id}"))
-            result = rag.query(req.query, model=req.model)
+            result = rag.query(req.query, model_type=req.model)
             return {"success": True, "data": result}
         except Exception as e:
             import traceback
